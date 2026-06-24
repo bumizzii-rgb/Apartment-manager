@@ -10,184 +10,195 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
-<script src="https://unpkg.com/tesseract.js@4/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --p:#1d4ed8;--pl:#dbeafe;--pd:#1e40af;
-  --s:#15803d;--sl:#dcfce7;
-  --w:#b45309;--wl:#fef3c7;
+  --p:#1a56db;--pl:#dbeafe;--pd:#1e3a8a;
+  --pg:linear-gradient(145deg,#1e3a8a 0%,#1a56db 60%,#3b82f6 100%);
+  --s:#059669;--sl:#d1fae5;
+  --w:#d97706;--wl:#fef3c7;
   --d:#dc2626;--dl:#fee2e2;
-  --g:#6b7280;--gl:#f3f4f6;
-  --bd:#e5e7eb;--tx:#111827;--tm:#6b7280;
-  --wh:#fff;--r:12px;--sh:0 2px 8px rgba(0,0,0,.1);
-  --nh:62px;
+  --g:#64748b;--gl:#f8fafc;
+  --bd:#e2e8f0;--tx:#0f172a;--tm:#64748b;
+  --wh:#fff;--r:16px;--r-sm:12px;
+  --sh:0 2px 12px rgba(0,0,0,.07);
+  --sh2:0 8px 32px rgba(0,0,0,.10);
+  --nh:72px;
 }
-body{font-family:-apple-system,'Segoe UI',sans-serif;background:#f1f5f9;color:var(--tx);min-height:100vh;padding-bottom:var(--nh);font-size:14px;overflow-x:hidden}
+body{font-family:-apple-system,'SF Pro Text','Segoe UI','Noto Sans Thai',sans-serif;background:#f0f4f8;color:var(--tx);min-height:100vh;padding-bottom:var(--nh);font-size:15px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
 /* NAV */
-#bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nh);background:var(--wh);border-top:1px solid var(--bd);display:flex;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,.08)}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--tm);font-size:10px;border:none;background:none;padding:6px 0;transition:color .15s}
+#bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nh);background:var(--wh);border-top:none;display:flex;z-index:1000;box-shadow:0 -1px 0 rgba(0,0,0,.06),0 -6px 28px rgba(0,0,0,.08)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;color:#94a3b8;font-size:11px;font-weight:600;border:none;background:none;padding:10px 4px 12px;transition:color .2s ease}
+.ni-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:12px;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.ni svg{width:26px;height:26px;transition:all .2s ease;stroke:currentColor}
 .ni.active{color:var(--p)}
-.ni .ico{font-size:22px;line-height:1}
+.ni.active .ni-icon{background:rgba(26,86,219,.12);transform:scale(1.1)}
+.ni span{transition:color .2s ease}
 
 /* HEADER */
-.ph{background:var(--p);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.ph h1{font-size:18px;font-weight:700}
-.ph-sub{font-size:11px;opacity:.8;margin-top:1px}
-.ph-actions{display:flex;gap:8px}
-.ph-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer}
+.ph{background:var(--pg);color:#fff;padding:22px 20px 24px;display:flex;align-items:flex-start;justify-content:space-between}
+.ph h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.ph-sub{font-size:12px;opacity:.75;margin-top:4px;font-weight:400}
+.ph-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.ph-btn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(10px)}
 
 /* VIEWS */
 .view{display:none}.view.active{display:block}
 
 /* CARDS */
-.card{background:var(--wh);border-radius:var(--r);padding:16px;margin:10px 10px 0;box-shadow:var(--sh)}
-.card-title{font-size:13px;font-weight:700;color:var(--tm);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.card{background:var(--wh);border-radius:var(--r);padding:20px;margin:12px 16px 0;box-shadow:var(--sh)}
+.card-title{font-size:11px;font-weight:700;color:var(--tm);margin-bottom:14px;text-transform:uppercase;letter-spacing:.8px}
 
 /* STATS */
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}
-.sc{background:var(--wh);border-radius:var(--r);padding:14px;box-shadow:var(--sh);text-align:center}
-.sc .v{font-size:30px;font-weight:800;line-height:1}
-.sc .l{font-size:11px;color:var(--tm);margin-top:3px}
-.sc.cp .v{color:var(--p)}.sc.cs .v{color:var(--s)}.sc.cw .v{color:var(--w)}.sc.cd .v{color:var(--d)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px}
+.sc{background:var(--wh);border-radius:var(--r);padding:18px 16px;box-shadow:var(--sh);border-bottom:3px solid transparent}
+.sc .v{font-size:30px;font-weight:800;line-height:1.1;margin-top:4px}
+.sc .l{font-size:11px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.sc.cp{border-bottom-color:var(--p)}.sc.cp .v{color:var(--p)}
+.sc.cs{border-bottom-color:var(--s)}.sc.cs .v{color:var(--s)}
+.sc.cw{border-bottom-color:var(--w)}.sc.cw .v{color:var(--w)}
+.sc.cd{border-bottom-color:var(--d)}.sc.cd .v{color:var(--d)}
 
 /* SECTION */
-.sh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 4px}
-.st{font-size:13px;font-weight:700}
-.sa{font-size:12px;color:var(--p);cursor:pointer}
+.sh{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 8px}
+.st{font-size:17px;font-weight:800;color:var(--tx)}
+.sa{font-size:14px;color:var(--p);font-weight:600;cursor:pointer}
 
 /* ROOM DOTS */
-.rdots{display:flex;flex-wrap:wrap;gap:7px;padding:6px 10px 10px}
-.rdot{width:50px;height:50px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;transition:transform .1s;line-height:1.2}
-.rdot:active{transform:scale(.9)}
+.rdots{display:flex;flex-wrap:wrap;gap:10px;padding:8px 16px 16px}
+.rdot{width:60px;height:60px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;transition:transform .15s;line-height:1.3}
+.rdot:active{transform:scale(.92)}
 .rdot.occupied{background:var(--pl);color:var(--p)}
 .rdot.vacant{background:var(--sl);color:var(--s)}
 .rdot.overdue{background:var(--dl);color:var(--d)}
 
 /* ALERTS */
-.ai{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.ai{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--bd)}
 .ai:last-child{border:none}
-.ai-ico{font-size:22px;flex-shrink:0}
+.ai-ico{font-size:28px;flex-shrink:0}
 .ai-txt{flex:1;min-width:0}
-.ai-tt{font-weight:600;font-size:13px}
-.ai-st{font-size:11px;color:var(--tm);margin-top:1px}
-.badge{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.ai-tt{font-weight:700;font-size:15px}
+.ai-st{font-size:12px;color:var(--tm);margin-top:3px}
+.badge{padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700}
 .bd{background:var(--dl);color:var(--d)}.bs{background:var(--sl);color:var(--s)}.bw{background:var(--wl);color:var(--w)}.bp{background:var(--pl);color:var(--p)}
 
 /* ROOM LIST */
-.rli{display:flex;align-items:center;gap:12px;padding:13px;background:var(--wh);margin:7px 10px 0;border-radius:var(--r);box-shadow:var(--sh);cursor:pointer;transition:transform .1s}
+.rli{display:flex;align-items:center;gap:14px;padding:16px;background:var(--wh);margin:8px 16px 0;border-radius:var(--r);box-shadow:var(--sh);cursor:pointer;transition:transform .15s}
 .rli:active{transform:scale(.98)}
-.rnum{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+.rnum{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0}
 .rnum.occupied{background:var(--pl);color:var(--p)}.rnum.vacant{background:var(--sl);color:var(--s)}
 .ri{flex:1;min-width:0}
-.ri .tn{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ri .td{font-size:11px;color:var(--tm);margin-top:2px}
-.rchev{color:var(--bd);font-size:20px}
+.ri .tn{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri .td{font-size:12px;color:var(--tm);margin-top:3px}
+.rchev{color:#cbd5e1;font-size:22px}
 
 /* SEARCH */
-.sbar{padding:8px 10px;background:#f1f5f9;position:sticky;top:0;z-index:50}
+.sbar{padding:12px 16px;background:#f0f4f8;position:sticky;top:0;z-index:50}
 .swrap{position:relative}
-.swrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px}
-.sinput{width:100%;padding:10px 12px 10px 34px;border:1.5px solid var(--bd);border-radius:10px;background:var(--wh);font-size:14px;outline:none}
-.sinput:focus{border-color:var(--p)}
+.swrap::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px}
+.sinput{width:100%;padding:14px 16px 14px 44px;border:1.5px solid var(--bd);border-radius:14px;background:var(--wh);font-size:15px;outline:none;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.sinput:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
 
 /* BUTTONS */
-.btn{padding:11px 18px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s}
-.btn:active{opacity:.8}
-.btnp{background:var(--p);color:#fff}
-.btns{background:var(--s);color:#fff}
+.btn{padding:15px 22px;border-radius:14px;border:none;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s;letter-spacing:-.1px}
+.btn:active{transform:scale(.97);opacity:.9}
+.btnp{background:var(--p);color:#fff;box-shadow:0 4px 14px rgba(26,86,219,.3)}
+.btns{background:var(--s);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.25)}
 .btnd{background:var(--d);color:#fff}
-.btno{background:var(--wh);color:var(--p);border:1.5px solid var(--p)}
-.btng{background:var(--gl);color:var(--tx)}
+.btno{background:var(--wh);color:var(--p);border:2px solid var(--p)}
+.btng{background:#f1f5f9;color:var(--tx)}
 .btnw{background:var(--w);color:#fff}
 .btnf{width:100%;justify-content:center}
-.btnsm{padding:7px 12px;font-size:12px}
+.btnsm{padding:10px 16px;font-size:13px}
 
 /* FAB */
-.fab{position:fixed;bottom:calc(var(--nh)+14px);right:14px;width:54px;height:54px;border-radius:50%;background:var(--p);color:#fff;font-size:26px;border:none;box-shadow:0 4px 16px rgba(29,78,216,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:500}
+.fab{position:fixed;bottom:calc(var(--nh)+18px);right:18px;width:60px;height:60px;border-radius:50%;background:var(--p);color:#fff;font-size:28px;border:none;box-shadow:0 6px 24px rgba(26,86,219,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:500;transition:transform .2s}
+.fab:active{transform:scale(.92)}
 
 /* MODAL */
-.mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:flex-end}
+.mover{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:2000;align-items:flex-end;backdrop-filter:blur(4px)}
 .mover.active{display:flex}
-.modal{background:var(--wh);border-radius:20px 20px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding-bottom:20px}
-.mhandle{width:40px;height:4px;background:var(--bd);border-radius:2px;margin:12px auto 6px}
-.mhdr{padding:6px 16px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
-.mtitle{font-size:16px;font-weight:700}
-.mclose{font-size:24px;cursor:pointer;color:var(--g);background:none;border:none;line-height:1}
-.mbody{padding:14px 16px}
-.mfoot{padding:10px 16px;border-top:1px solid var(--bd);display:flex;gap:8px}
+.modal{background:var(--wh);border-radius:24px 24px 0 0;width:100%;max-height:93vh;overflow-y:auto;padding-bottom:24px}
+.mhandle{width:44px;height:5px;background:#e2e8f0;border-radius:3px;margin:14px auto 8px}
+.mhdr{padding:8px 20px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.mtitle{font-size:18px;font-weight:800}
+.mclose{font-size:28px;cursor:pointer;color:#94a3b8;background:none;border:none;line-height:1}
+.mbody{padding:16px 20px}
+.mfoot{padding:14px 20px;border-top:1px solid var(--bd);display:flex;gap:10px}
 
 /* FORM */
-.fg{margin-bottom:12px}
-.fl{font-size:12px;font-weight:600;color:var(--tm);margin-bottom:4px;display:block}
-.fc{width:100%;padding:10px 12px;border:1.5px solid var(--bd);border-radius:10px;font-size:14px;outline:none;background:var(--wh);transition:border-color .15s}
-.fc:focus{border-color:var(--p)}
-select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
-.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.fg{margin-bottom:16px}
+.fl{font-size:13px;font-weight:700;color:var(--tm);margin-bottom:6px;display:block}
+.fc{width:100%;padding:14px 16px;border:1.5px solid var(--bd);border-radius:14px;font-size:15px;outline:none;background:var(--wh);transition:all .2s;color:var(--tx)}
+.fc:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:42px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 
 /* METER COLLECTION */
-.mpc{padding:10px 14px;background:var(--p);color:#fff;display:flex;align-items:center;gap:10px}
-.mpbar{flex:1;height:6px;background:rgba(255,255,255,.3);border-radius:3px;overflow:hidden}
-.mpfill{height:100%;background:#fff;border-radius:3px;transition:width .4s ease}
-.mptext{font-size:12px;white-space:nowrap}
+.mpc{padding:14px 20px;background:var(--pg);color:#fff;display:flex;align-items:center;gap:12px}
+.mpbar{flex:1;height:8px;background:rgba(255,255,255,.25);border-radius:4px;overflow:hidden}
+.mpfill{height:100%;background:#fff;border-radius:4px;transition:width .4s ease}
+.mptext{font-size:13px;font-weight:700;white-space:nowrap}
 
-.camera-zone{background:#0f172a;border-radius:12px;margin:10px;overflow:hidden;position:relative;min-height:160px;display:flex;align-items:center;justify-content:center}
-.camera-zone img{width:100%;height:auto;display:block;max-height:220px;object-fit:cover}
-.cz-ph{color:#64748b;text-align:center;padding:24px}
-.cz-ph .ico{font-size:44px;display:block;margin-bottom:6px}
-.cz-ph span{font-size:13px}
-.cz-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(29,78,216,.85);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#fff}
+.camera-zone{background:#0f172a;border-radius:16px;margin:12px 16px;overflow:hidden;position:relative;min-height:180px;display:flex;align-items:center;justify-content:center}
+.camera-zone img{width:100%;height:auto;display:block;max-height:240px;object-fit:cover}
+.cz-ph{color:#64748b;text-align:center;padding:30px}
+.cz-ph .ico{font-size:52px;display:block;margin-bottom:8px}
+.cz-ph span{font-size:14px}
+.cz-overlay{position:absolute;inset:0;background:rgba(26,86,219,.85);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#fff}
 
-.ocrbox{background:var(--pl);border:2px solid var(--p);border-radius:10px;padding:12px 14px;margin:0 10px;text-align:center}
-.ocrval{font-size:36px;font-weight:800;color:var(--p);line-height:1}
-.ocrlbl{font-size:11px;color:var(--tm);margin-top:2px}
-.ocrwarn{background:var(--wl);border:2px solid #f59e0b;border-radius:10px;padding:10px 14px;margin:6px 10px;font-size:13px;color:var(--w)}
+.meter-calc{font-size:13px;color:var(--tm);padding:6px 16px 12px;text-align:center;font-weight:500}
+.meter-calc .usage{font-weight:800;font-size:15px;color:var(--p)}
+.meter-calc .cost{color:var(--s);font-weight:700}
 
-.mfield{margin:8px 10px;background:var(--wh);border-radius:10px;border:1.5px solid var(--bd);display:flex;align-items:center;gap:10px;padding:10px 12px}
-.mfield .mflbl{font-size:12px;color:var(--tm);white-space:nowrap}
-.mfield input{flex:1;border:none;outline:none;font-size:22px;font-weight:700;text-align:center;color:var(--p);background:transparent}
-.mfield .mfunit{font-size:12px;color:var(--tm);white-space:nowrap}
+.mfield{margin:10px 16px;background:var(--wh);border-radius:14px;border:2px solid var(--bd);display:flex;align-items:center;gap:12px;padding:14px 16px}
+.mfield .mflbl{font-size:13px;color:var(--tm);font-weight:600;white-space:nowrap}
+.mfield input{flex:1;border:none;outline:none;font-size:28px;font-weight:800;text-align:center;color:var(--p);background:transparent}
+.mfield .mfunit{font-size:13px;color:var(--tm);white-space:nowrap}
 
 /* INVOICES */
-.icard{background:var(--wh);border-radius:var(--r);margin:7px 10px 0;box-shadow:var(--sh);overflow:hidden;cursor:pointer}
-.ichdr{padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
-.ichdr-l{display:flex;align-items:center;gap:10px}
-.ichdr-rnum{width:40px;height:40px;border-radius:8px;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
-.ichdr-info .tn{font-weight:700;font-size:14px}
-.ichdr-info .dt{font-size:11px;color:var(--tm);margin-top:1px}
-.ichdr-r{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.ichdr-total{font-size:16px;font-weight:800;color:var(--tx)}
-.icbody{padding:10px 14px 14px;border-top:1px solid var(--gl);background:#fafafa;display:none}
+.icard{background:var(--wh);border-radius:var(--r);margin:8px 16px 0;box-shadow:var(--sh);overflow:hidden;cursor:pointer;transition:transform .15s}
+.icard:active{transform:scale(.99)}
+.ichdr{padding:16px;display:flex;align-items:center;justify-content:space-between}
+.ichdr-l{display:flex;align-items:center;gap:14px}
+.ichdr-rnum{width:50px;height:50px;border-radius:14px;background:var(--pl);color:var(--p);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
+.ichdr-info .tn{font-weight:800;font-size:15px}
+.ichdr-info .dt{font-size:12px;color:var(--tm);margin-top:3px}
+.ichdr-r{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.ichdr-total{font-size:18px;font-weight:800;color:var(--tx)}
+.icbody{padding:14px 16px 16px;border-top:1px solid #f1f5f9;background:#f8fafc;display:none}
 .icard.expanded .icbody{display:block}
-.irow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--tx)}
-.irow.total{font-weight:700;font-size:15px;border-top:1px solid var(--bd);margin-top:6px;padding-top:8px;color:var(--p)}
+.irow{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;color:var(--tx)}
+.irow.total{font-weight:800;font-size:17px;border-top:2px solid var(--bd);margin-top:8px;padding-top:10px;color:var(--p)}
 .irow-lbl{color:var(--tm)}
-.ifoot-btns{display:flex;gap:8px;margin-top:12px}
+.ifoot-btns{display:flex;gap:10px;margin-top:14px}
 
 /* MONTH SELECTOR */
-.msel{display:flex;align-items:center;gap:10px;padding:10px;background:var(--wh);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:50}
-.mselb{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--bd);background:var(--wh);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-.mseld{flex:1;text-align:center;font-weight:700;font-size:15px}
+.msel{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--wh);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:50}
+.mselb{width:42px;height:42px;border-radius:50%;border:2px solid var(--bd);background:var(--wh);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.mseld{flex:1;text-align:center;font-weight:800;font-size:17px}
 
 /* FILTER CHIPS */
-.chips{display:flex;gap:6px;padding:8px 10px;overflow-x:auto}
+.chips{display:flex;gap:8px;padding:12px 16px;overflow-x:auto}
 .chips::-webkit-scrollbar{display:none}
-.chip{padding:6px 14px;border-radius:999px;border:1.5px solid var(--bd);background:var(--wh);font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;color:var(--tm);transition:all .15s;flex-shrink:0}
-.chip.active{background:var(--p);border-color:var(--p);color:#fff}
+.chip{padding:9px 18px;border-radius:999px;border:2px solid var(--bd);background:var(--wh);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;color:var(--tm);transition:all .2s;flex-shrink:0}
+.chip.active{background:var(--p);border-color:var(--p);color:#fff;box-shadow:0 4px 12px rgba(26,86,219,.25)}
 
 /* SETTINGS */
-.stsec{margin:10px;background:var(--wh);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
-.strow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bd);cursor:pointer}
+.stsec{margin:12px 16px;background:var(--wh);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.strow{display:flex;align-items:center;justify-content:space-between;padding:18px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s}
+.strow:active{background:#f8fafc}
 .strow:last-child{border:none}
-.strow-l{display:flex;align-items:center;gap:12px}
-.sticon{font-size:20px;width:26px;text-align:center}
-.stlbl{font-size:14px}
-.stval{font-size:12px;color:var(--tm)}
-.chevron{color:var(--bd);font-size:18px}
+.strow-l{display:flex;align-items:center;gap:14px}
+.sticon{font-size:22px;width:30px;text-align:center}
+.stlbl{font-size:15px;font-weight:600}
+.stval{font-size:12px;color:var(--tm);margin-top:2px}
+.chevron{color:#cbd5e1;font-size:20px}
 
 /* INVOICE PRINT */
 .inv-print{font-family:-apple-system,sans-serif;padding:20px;max-width:400px;margin:0 auto}
@@ -201,78 +212,108 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .inv-unpaid{display:inline-block;background:var(--dl);color:var(--d);padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700;margin-top:10px}
 
 /* TOAST */
-#toast{position:fixed;bottom:calc(var(--nh)+14px);left:10px;right:10px;background:#1e293b;color:#fff;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:500;z-index:9999;transform:translateY(120%);transition:transform .3s;text-align:center}
+#toast{position:fixed;bottom:calc(var(--nh)+18px);left:16px;right:16px;background:#1e293b;color:#fff;padding:16px 20px;border-radius:16px;font-size:15px;font-weight:600;z-index:9999;transform:translateY(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.2)}
 #toast.show{transform:translateY(0)}
 #toast.success{background:var(--s)}
 #toast.error{background:var(--d)}
 
 /* SPINNER */
-.spin{width:28px;height:28px;border:3px solid var(--bd);border-top-color:var(--p);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto}
+.spin{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--p);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* LOADING */
-#loading{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-size:14px}
+#loading{display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:16px;color:#fff;font-size:15px}
 #loading.show{display:flex}
 
 /* EMPTY */
-.empty{text-align:center;padding:48px 24px;color:var(--tm)}
-.empty .ico{font-size:52px;margin-bottom:12px;display:block}
-.empty .et{font-size:16px;font-weight:600;margin-bottom:6px;color:var(--tx)}
-.empty .es{font-size:13px}
+.empty{text-align:center;padding:56px 24px;color:var(--tm)}
+.empty .ico{font-size:60px;margin-bottom:14px;display:block}
+.empty .et{font-size:18px;font-weight:700;margin-bottom:8px;color:var(--tx)}
+.empty .es{font-size:14px;line-height:1.6}
 
 /* DIVIDER */
-.divider{height:1px;background:var(--bd);margin:8px 0}
-.section-pad{height:10px}
+.divider{height:1px;background:var(--bd);margin:10px 0}
+.section-pad{height:12px}
 
-/* STATUS BAR (top of meter view) */
-.mroom-hdr{background:var(--wh);border-bottom:1px solid var(--bd);padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
-.mroom-hdr .rn{font-size:22px;font-weight:800;color:var(--p)}
-.mroom-hdr .tn{font-size:14px;color:var(--tm)}
-.mroom-hdr .prev{font-size:12px;color:var(--tm);background:var(--gl);padding:4px 10px;border-radius:8px;text-align:right}
+/* METER ROOM HEADER */
+.mroom-hdr{background:var(--wh);border-bottom:1px solid var(--bd);padding:16px;display:flex;align-items:center;justify-content:space-between}
+.mroom-hdr .rn{font-size:26px;font-weight:800;color:var(--p)}
+.mroom-hdr .tn{font-size:14px;color:var(--tm);font-weight:500}
+.mroom-hdr .prev{font-size:12px;color:var(--tm);background:var(--gl);padding:6px 12px;border-radius:10px;text-align:right;font-weight:600}
 
-/* SECTION IN METER */
-.msec{background:var(--wh);border-radius:var(--r);margin:8px 10px;box-shadow:var(--sh);overflow:hidden}
-.msec-hdr{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--gl)}
-.msec-ico{font-size:20px}
-.msec-title{font-weight:700;font-size:14px}
-.msec-prev{margin-left:auto;font-size:12px;color:var(--tm)}
+/* METER SECTION */
+.msec{background:var(--wh);border-radius:var(--r);margin:10px 16px;box-shadow:var(--sh);overflow:hidden}
+.msec-hdr{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gl)}
+.msec-ico{font-size:22px}
+.msec-title{font-weight:700;font-size:15px}
+.msec-prev{margin-left:auto;font-size:12px;color:var(--tm);font-weight:600}
 
-/* GENERATE ALL MODAL */
-.gen-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)}
+/* GENERATE MODAL */
+.gen-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--bd)}
 .gen-item:last-child{border:none}
-.gen-chk{width:20px;height:20px;accent-color:var(--p);cursor:pointer}
+.gen-chk{width:22px;height:22px;accent-color:var(--p);cursor:pointer}
 
-/* OVERVIEW SECTION */
-.ov-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:0 10px 10px}
-.ov-card{background:var(--wh);border-radius:10px;padding:12px 8px;text-align:center;box-shadow:var(--sh)}
-.ov-v{font-size:22px;font-weight:800}
-.ov-l{font-size:10px;color:var(--tm);margin-top:2px}
+/* OVERVIEW */
+.ov-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 16px 12px}
+.ov-card{background:var(--wh);border-radius:14px;padding:14px 10px;text-align:center;box-shadow:var(--sh)}
+.ov-v{font-size:24px;font-weight:800}
+.ov-l{font-size:10px;color:var(--tm);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
 
-/* ROOM SELECTOR CHIPS (meter) */
-.mc-room-sel{display:flex;gap:6px;padding:8px 10px;overflow-x:auto;background:var(--wh);border-bottom:1px solid var(--bd)}
+/* ROOM SELECTOR (meter) */
+.mc-room-sel{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;background:var(--wh);border-bottom:1px solid var(--bd)}
 .mc-room-sel::-webkit-scrollbar{display:none}
-.mc-chip{padding:5px 12px;border-radius:999px;border:1.5px solid var(--bd);background:var(--wh);font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;color:var(--tm);flex-shrink:0;transition:all .15s}
+.mc-chip{padding:8px 16px;border-radius:999px;border:2px solid var(--bd);background:var(--wh);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;color:var(--tm);flex-shrink:0;transition:all .15s}
 .mc-chip.active{background:var(--p);border-color:var(--p);color:#fff}
 .mc-chip.done{background:var(--sl);border-color:var(--s);color:var(--s)}
 
 /* QR CODE */
-.qr-section{text-align:center;padding:14px;border-top:1px dashed #ccc;margin-top:14px}
-.qr-section p{font-size:12px;color:var(--tm);margin-bottom:8px}
-.qr-box{display:inline-block;background:#fff;padding:8px;border-radius:10px;border:1px solid var(--bd)}
-.qr-amt{font-size:12px;color:var(--tm);margin-top:6px;font-weight:600}
+.qr-section{text-align:center;padding:16px;border-top:1px dashed #e2e8f0;margin-top:16px}
+.qr-section p{font-size:13px;color:var(--tm);margin-bottom:10px;font-weight:600}
+.qr-box{display:inline-block;background:#fff;padding:10px;border-radius:14px;border:1.5px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.qr-amt{font-size:13px;color:var(--tm);margin-top:8px;font-weight:700}
 
 /* CHECKOUT */
-.co-result{border-radius:10px;padding:14px;margin-top:10px}
+.co-result{border-radius:16px;padding:18px;margin-top:12px}
 .co-result.refund{background:var(--sl);border:2px solid var(--s)}
 .co-result.owe{background:var(--dl);border:2px solid var(--d)}
-.co-result .co-amount{font-size:28px;font-weight:800;text-align:center}
-.co-result .co-label{font-size:13px;text-align:center;margin-top:2px}
+.co-result .co-amount{font-size:34px;font-weight:800;text-align:center}
+.co-result .co-label{font-size:14px;text-align:center;margin-top:4px;font-weight:600}
+
+/* ===== DASHBOARD REDESIGN ===== */
+.dash-hero{margin:14px 16px 0;background:var(--pg);border-radius:22px;padding:24px 22px 22px;color:#fff;position:relative;overflow:hidden}
+.dash-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;background:rgba(255,255,255,.07);border-radius:50%}
+.dash-hero::after{content:'';position:absolute;bottom:-70px;right:30px;width:220px;height:220px;background:rgba(255,255,255,.04);border-radius:50%}
+.dash-hero-label{font-size:12px;opacity:.75;font-weight:600;margin-bottom:10px;letter-spacing:.3px;position:relative}
+.dash-hero-amount{font-size:42px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-bottom:6px;position:relative}
+.dash-hero-sub{font-size:13px;opacity:.75;font-weight:500;position:relative}
+.dash-hero-bar{margin-top:20px;height:7px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;position:relative}
+.dash-hero-fill{height:100%;background:#fff;border-radius:4px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+.dash-hero-pct{position:absolute;right:0;top:-18px;font-size:12px;opacity:.8;font-weight:700}
+
+.dash-stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px 16px 0}
+.dash-stat{background:var(--wh);border-radius:18px;padding:18px 10px 16px;text-align:center;box-shadow:var(--sh);position:relative;overflow:hidden}
+.dash-stat-bar{position:absolute;bottom:0;left:0;right:0;height:3px}
+.dash-stat-ico{font-size:20px;margin-bottom:8px;display:block}
+.dash-stat-v{font-size:34px;font-weight:800;line-height:1;display:block}
+.dash-stat-l{font-size:11px;color:var(--tm);margin-top:5px;font-weight:600;display:block;letter-spacing:.2px}
+
+.dash-finance{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px 0}
+.dash-fin-card{border-radius:18px;padding:20px 18px 18px;overflow:hidden;position:relative}
+.dash-fin-card.collected{background:linear-gradient(140deg,#d1fae5 0%,#a7f3d0 100%)}
+.dash-fin-card.outstanding{background:linear-gradient(140deg,#fee2e2 0%,#fecaca 100%)}
+.dash-fin-ico{font-size:26px;margin-bottom:10px;display:block}
+.dash-fin-amt{font-size:20px;font-weight:800;line-height:1.2;display:block;word-break:break-all}
+.dash-fin-lbl{font-size:11px;margin-top:5px;font-weight:700;display:block;opacity:.75}
+.dash-fin-card.collected .dash-fin-amt{color:#065f46}
+.dash-fin-card.collected .dash-fin-lbl{color:#047857}
+.dash-fin-card.outstanding .dash-fin-amt{color:#991b1b}
+.dash-fin-card.outstanding .dash-fin-lbl{color:#b91c1c}
 
 /* RESPONSIVE */
 @media(min-width:480px){
   .stats{grid-template-columns:1fr 1fr 1fr 1fr}
-  .mover{align-items:center;justify-content:center}
-  .modal{max-width:480px;border-radius:20px;margin:auto}
+  .mover{align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+  .modal{max-width:480px;border-radius:24px;margin:auto}
 }
 @media print{
   #bnav,#toast,#loading,.no-print{display:none!important}
@@ -286,19 +327,53 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 <!-- BOTTOM NAV -->
 <nav id="bnav">
   <button class="ni active" onclick="showView('dashboard')" id="nav-dashboard">
-    <span class="ico">🏠</span>หน้าหลัก
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <span>หน้าหลัก</span>
   </button>
   <button class="ni" onclick="showView('meter')" id="nav-meter">
-    <span class="ico">📷</span>จดมิเตอร์
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    </div>
+    <span>จดมิเตอร์</span>
   </button>
   <button class="ni" onclick="showView('bills')" id="nav-bills">
-    <span class="ico">📄</span>ใบแจ้งหนี้
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <line x1="10" y1="9" x2="8" y2="9"/>
+      </svg>
+    </div>
+    <span>ใบแจ้งหนี้</span>
   </button>
   <button class="ni" onclick="showView('rooms')" id="nav-rooms">
-    <span class="ico">🏘️</span>ห้องพัก
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="18" rx="2"/>
+        <path d="M2 9h20"/>
+        <path d="M12 9v12"/>
+      </svg>
+    </div>
+    <span>ห้องพัก</span>
   </button>
   <button class="ni" onclick="showView('settings')" id="nav-settings">
-    <span class="ico">⚙️</span>ตั้งค่า
+    <div class="ni-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </div>
+    <span>ตั้งค่า</span>
   </button>
 </nav>
 
@@ -315,18 +390,18 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       <h1 id="apt-name-hdr">ApartmentPro</h1>
       <div class="ph-sub" id="today-date"></div>
     </div>
-    <div class="ph-actions" style="flex-direction:column;align-items:flex-end;gap:4px">
+    <div class="ph-actions">
       <button class="ph-btn" onclick="showView('meter')">📷 จดมิเตอร์</button>
-      <span id="sync-status" style="font-size:10px;opacity:.85;cursor:pointer" onclick="loadFromCloud()">🔄 กำลังเชื่อมต่อ...</span>
+      <span id="sync-status" style="font-size:11px;opacity:.85;cursor:pointer;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.2)" onclick="loadFromCloud()">🔄 กำลังเชื่อมต่อ...</span>
     </div>
   </div>
 
-  <div class="stats" id="dash-stats"></div>
+  <div id="dash-stats"></div>
 
-  <div class="ov-grid" id="dash-ov"></div>
+  <div id="dash-ov"></div>
 
-  <div class="sh"><span class="st">⚠️ แจ้งเตือน</span></div>
-  <div class="card" id="dash-alerts"><div class="empty" style="padding:16px"><span class="ico">✅</span><span class="et" style="font-size:14px">ไม่มีรายการแจ้งเตือน</span></div></div>
+  <div class="sh"><span class="st">แจ้งเตือน</span></div>
+  <div class="card" id="dash-alerts"></div>
 
   <div class="sh"><span class="st">สถานะห้องพัก</span><span class="sa" onclick="showView('rooms')">ดูทั้งหมด →</span></div>
   <div class="rdots" id="dash-rooms"></div>
@@ -387,24 +462,20 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
         <span class="msec-prev" id="mc-prev-water">ก่อนหน้า: -</span>
       </div>
       <div class="camera-zone" id="water-preview">
-        <div class="cz-ph"><span class="ico">💧</span><span>แตะปุ่มถ่ายรูปมิเตอร์น้ำ</span></div>
+        <div class="cz-ph"><span class="ico">💧</span><span>แตะถ่ายรูปเก็บหลักฐาน (ไม่บังคับ)</span></div>
       </div>
-      <div style="display:flex;gap:8px;padding:8px 10px">
-        <label class="btn btno" style="flex:1;justify-content:center;cursor:pointer" for="water-cam">
-          📷 ถ่ายรูป
+      <div style="padding:10px 16px">
+        <label class="btn btno btnf" style="justify-content:center;cursor:pointer" for="water-cam">
+          📷 ถ่ายรูปมิเตอร์น้ำ
         </label>
-        <button class="btn btng" onclick="runOCR('water')" id="ocr-water-btn" style="flex:1" disabled>🔍 อ่านค่า</button>
       </div>
       <input type="file" id="water-cam" accept="image/*" capture="environment" style="display:none" onchange="photoSelected(this,'water')">
-      <div id="water-ocr-result" style="display:none">
-        <div class="ocrbox"><div class="ocrlbl">ค่าที่ตรวจจับได้</div><div class="ocrval" id="water-ocr-val">-</div></div>
-        <div class="ocrwarn" id="water-warn" style="display:none"></div>
-      </div>
       <div class="mfield">
-        <span class="mflbl">ค่ามิเตอร์น้ำ</span>
-        <input type="number" id="mc-water-val" placeholder="0" inputmode="numeric">
+        <span class="mflbl">💧 ค่ามิเตอร์น้ำ</span>
+        <input type="number" id="mc-water-val" placeholder="กรอกค่า" inputmode="numeric" oninput="updateUsageCalc('water')">
         <span class="mfunit">หน่วย</span>
       </div>
+      <div class="meter-calc" id="water-calc" style="display:none"></div>
     </div>
 
     <!-- Electricity Meter -->
@@ -415,24 +486,20 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
         <span class="msec-prev" id="mc-prev-elec">ก่อนหน้า: -</span>
       </div>
       <div class="camera-zone" id="elec-preview">
-        <div class="cz-ph"><span class="ico">⚡</span><span>แตะปุ่มถ่ายรูปมิเตอร์ไฟ</span></div>
+        <div class="cz-ph"><span class="ico">⚡</span><span>แตะถ่ายรูปเก็บหลักฐาน (ไม่บังคับ)</span></div>
       </div>
-      <div style="display:flex;gap:8px;padding:8px 10px">
-        <label class="btn btno" style="flex:1;justify-content:center;cursor:pointer" for="elec-cam">
-          📷 ถ่ายรูป
+      <div style="padding:10px 16px">
+        <label class="btn btno btnf" style="justify-content:center;cursor:pointer" for="elec-cam">
+          📷 ถ่ายรูปมิเตอร์ไฟ
         </label>
-        <button class="btn btng" onclick="runOCR('elec')" id="ocr-elec-btn" style="flex:1" disabled>🔍 อ่านค่า</button>
       </div>
       <input type="file" id="elec-cam" accept="image/*" capture="environment" style="display:none" onchange="photoSelected(this,'elec')">
-      <div id="elec-ocr-result" style="display:none">
-        <div class="ocrbox"><div class="ocrlbl">ค่าที่ตรวจจับได้</div><div class="ocrval" id="elec-ocr-val">-</div></div>
-        <div class="ocrwarn" id="elec-warn" style="display:none"></div>
-      </div>
       <div class="mfield">
-        <span class="mflbl">ค่ามิเตอร์ไฟ</span>
-        <input type="number" id="mc-elec-val" placeholder="0" inputmode="numeric">
+        <span class="mflbl">⚡ ค่ามิเตอร์ไฟ</span>
+        <input type="number" id="mc-elec-val" placeholder="กรอกค่า" inputmode="numeric" oninput="updateUsageCalc('elec')">
         <span class="mfunit">หน่วย</span>
       </div>
+      <div class="meter-calc" id="elec-calc" style="display:none"></div>
     </div>
 
     <div style="padding:10px;display:flex;gap:8px">
@@ -543,19 +610,134 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       <div class="strow-l"><span class="sticon">📦</span><span class="stlbl">เวอร์ชัน</span></div>
       <span class="stval">ApartmentPro v1.0</span>
     </div>
-    <div class="strow" onclick="if(confirm('โหลดข้อมูลจริงพฤษภาคม 2569?\n\nข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่ด้วยข้อมูลจริงจาก Spreadsheet'))loadRealData()">
-      <div class="strow-l"><span class="sticon">🔄</span><span class="stlbl">โหลดข้อมูลจริง พ.ค. 2569</span></div>
-      <span class="chevron">›</span>
+  </div>
+
+  <!-- ADMIN ZONE -->
+  <div class="sh">
+    <span class="st">🔐 โซนผู้ดูแลระบบ</span>
+    <span class="sa" id="admin-toggle-btn" onclick="toggleAdminZone()">🔒 ปลดล็อก</span>
+  </div>
+
+  <!-- Locked state -->
+  <div id="admin-zone-locked" class="card" style="text-align:center;padding:28px 20px">
+    <div style="font-size:48px;margin-bottom:12px">🔐</div>
+    <div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px">พื้นที่ผู้ดูแลระบบ</div>
+    <div style="font-size:13px;color:var(--tm);margin-bottom:18px;line-height:1.6">การรีเซ็ตข้อมูลต้องได้รับการยืนยันจากผู้ดูแล<br>เพื่อป้องกันการลบข้อมูลโดยไม่ตั้งใจ</div>
+    <button class="btn btnp btnf" onclick="openAdminUnlock()">🔓 ปลดล็อกโหมดผู้ดูแล</button>
+  </div>
+
+  <!-- Unlocked state -->
+  <div id="admin-zone-open" style="display:none">
+    <div class="stsec" style="border:2px solid var(--dl);margin:0 16px">
+      <div class="strow" onclick="openSetAdminPassword()">
+        <div class="strow-l"><span class="sticon">🔑</span><div><div class="stlbl">เปลี่ยนรหัสผ่าน Admin</div><div class="stval" id="admin-pw-status">-</div></div></div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="strow" onclick="confirmLoadRealData()">
+        <div class="strow-l"><span class="sticon">🔄</span><span class="stlbl">โหลดข้อมูลจริง พ.ค. 2569</span></div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="strow" onclick="openAdminReset()" style="background:#fff5f5">
+        <div class="strow-l"><span class="sticon" style="color:var(--d)">🗑️</span><div><div class="stlbl" style="color:var(--d);font-weight:700">รีเซ็ตข้อมูลทั้งหมด</div><div class="stval" style="color:var(--d)">ลบห้อง มิเตอร์ และใบแจ้งหนี้ทั้งหมด</div></div></div>
+        <span class="chevron" style="color:var(--d)">›</span>
+      </div>
     </div>
-    <div class="strow" onclick="if(confirm('ลบข้อมูลทั้งหมด? ไม่สามารถย้อนกลับได้'))resetAll()">
-      <div class="strow-l"><span class="sticon" style="color:var(--d)">🗑️</span><span class="stlbl" style="color:var(--d)">รีเซ็ตข้อมูลทั้งหมด</span></div>
-      <span class="chevron">›</span>
+    <div style="padding:10px 16px">
+      <button class="btn btng btnf btnsm" onclick="lockAdmin()">🔒 ล็อกโหมดผู้ดูแล</button>
     </div>
   </div>
+
   <div class="section-pad"></div>
 </div>
 
-<!-- ==================== MODALS ==================== -->
+<!-- Admin Unlock Modal -->
+<div class="mover" id="admin-unlock-modal">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhdr">
+      <span class="mtitle">🔐 ยืนยันตัวตนผู้ดูแล</span>
+      <button class="mclose" onclick="closeModal('admin-unlock-modal')">✕</button>
+    </div>
+    <div class="mbody">
+      <div style="text-align:center;padding:8px 0 20px">
+        <div style="font-size:52px">🔐</div>
+        <div style="font-size:13px;color:var(--tm);margin-top:8px">กรุณากรอกรหัสผ่านผู้ดูแลระบบ</div>
+      </div>
+      <div class="fg">
+        <label class="fl">รหัสผ่าน Admin</label>
+        <input class="fc" type="password" id="admin-pw-input" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter') submitAdminUnlock()">
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btng" onclick="closeModal('admin-unlock-modal')" style="flex:1">ยกเลิก</button>
+      <button class="btn btnp" onclick="submitAdminUnlock()" style="flex:2">🔓 ปลดล็อก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set Admin Password Modal -->
+<div class="mover" id="set-pw-modal">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhdr">
+      <span class="mtitle">🔑 ตั้งรหัสผ่าน Admin</span>
+      <button class="mclose" onclick="closeModal('set-pw-modal')">✕</button>
+    </div>
+    <div class="mbody">
+      <div class="fg">
+        <label class="fl">รหัสผ่านใหม่ (อย่างน้อย 4 ตัวอักษร)</label>
+        <input class="fc" type="password" id="new-admin-pw" placeholder="••••••••">
+      </div>
+      <div class="fg">
+        <label class="fl">ยืนยันรหัสผ่านอีกครั้ง</label>
+        <input class="fc" type="password" id="confirm-admin-pw" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter') saveAdminPassword()">
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btng" onclick="closeModal('set-pw-modal')" style="flex:1">ยกเลิก</button>
+      <button class="btn btnp" onclick="saveAdminPassword()" style="flex:2">💾 บันทึกรหัสผ่าน</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Reset Modal -->
+<div class="mover" id="admin-reset-modal">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhdr">
+      <span class="mtitle" style="color:var(--d)">⚠️ รีเซ็ตข้อมูลทั้งหมด</span>
+      <button class="mclose" onclick="closeModal('admin-reset-modal')">✕</button>
+    </div>
+    <div class="mbody">
+      <div style="background:var(--dl);border-radius:14px;padding:16px;margin-bottom:16px;border:2px solid var(--d)">
+        <div style="font-size:14px;font-weight:800;color:var(--d);margin-bottom:8px">⚠️ คำเตือนสำคัญ</div>
+        <div style="font-size:13px;color:#7f1d1d;line-height:1.7">
+          การดำเนินการนี้จะลบข้อมูลทั้งหมดอย่างถาวร:<br>
+          • ข้อมูลห้องพักและผู้เช่าทั้งหมด<br>
+          • บันทึกค่ามิเตอร์ทุกเดือน<br>
+          • ใบแจ้งหนี้ทุกฉบับ<br><br>
+          <strong>ระบบจะสำรองข้อมูลอัตโนมัติก่อนลบ</strong>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl" style="color:var(--d)">พิมพ์ <strong>DELETE ALL DATA</strong> เพื่อยืนยัน</label>
+        <input class="fc" type="text" id="reset-confirm-text"
+          placeholder="DELETE ALL DATA"
+          autocomplete="off" autocorrect="off" spellcheck="false"
+          style="font-family:monospace;font-size:15px;letter-spacing:.5px;border-color:var(--d);color:var(--d)"
+          oninput="document.getElementById('exec-reset-btn').disabled=this.value!=='DELETE ALL DATA'">
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="btn btng" onclick="closeModal('admin-reset-modal')" style="flex:1">ยกเลิก</button>
+      <button class="btn btnd" id="exec-reset-btn" onclick="executeAdminReset()" style="flex:2;opacity:.4" disabled>🗑️ ลบข้อมูลทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODALS ====================
 
 <!-- Room Modal -->
 <div class="mover" id="room-modal">
@@ -1064,42 +1246,80 @@ function renderDashboard(){
   const cm=now.getMonth()+1;
   const unpaidInvs=S.invoices.filter(i=>i.status==='unpaid');
   const unpaid=unpaidInvs.length;
-
-  document.getElementById('apt-name-hdr').textContent=S.settings.apartmentName;
-
-  document.getElementById('dash-stats').innerHTML=`
-    <div class="sc cp"><div class="v">${total}</div><div class="l">ห้องทั้งหมด</div></div>
-    <div class="sc cs"><div class="v">${occupied}</div><div class="l">มีผู้เช่า</div></div>
-    <div class="sc cw"><div class="v">${vacant}</div><div class="l">ห้องว่าง</div></div>
-    <div class="sc cd"><div class="v">${unpaid}</div><div class="l">ค้างชำระ</div></div>`;
-
-  // Revenue this month
   const thisMonthInvs=S.invoices.filter(i=>i.month===cm&&i.year===ty);
   const collected=thisMonthInvs.filter(i=>i.status==='paid').reduce((a,b)=>a+b.total,0);
   const pending=thisMonthInvs.filter(i=>i.status==='unpaid').reduce((a,b)=>a+b.total,0);
+  const collectedRooms=thisMonthInvs.filter(i=>i.status==='paid').length;
+  const monthlyTotal=collected+pending;
+  const pct=monthlyTotal>0?Math.round(collected/monthlyTotal*100):0;
+  const occupancyPct=total>0?Math.round(occupied/total*100):0;
+
+  document.getElementById('apt-name-hdr').textContent=S.settings.apartmentName||'ApartmentPro';
+
+  // Hero card + room stats
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="dash-hero">
+      <div class="dash-hero-label">💰 รายรับเดือนนี้ · ${THAI_MONTHS[cm-1]} ${ty}</div>
+      <div class="dash-hero-amount">฿${fmtI(collected)}</div>
+      <div class="dash-hero-sub">เก็บแล้ว ${collectedRooms}/${thisMonthInvs.length} ห้อง</div>
+      <div class="dash-hero-bar" style="position:relative">
+        <div class="dash-hero-pct">${pct}%</div>
+        <div class="dash-hero-fill" style="width:${pct}%"></div>
+      </div>
+    </div>
+    <div class="dash-stat-row">
+      <div class="dash-stat">
+        <div class="dash-stat-bar" style="background:var(--p)"></div>
+        <span class="dash-stat-ico">🏢</span>
+        <span class="dash-stat-v" style="color:var(--p)">${total}</span>
+        <span class="dash-stat-l">ห้องทั้งหมด</span>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-bar" style="background:var(--s)"></div>
+        <span class="dash-stat-ico">👥</span>
+        <span class="dash-stat-v" style="color:var(--s)">${occupied}</span>
+        <span class="dash-stat-l">มีผู้เช่า · ${occupancyPct}%</span>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-bar" style="background:var(--w)"></div>
+        <span class="dash-stat-ico">🚪</span>
+        <span class="dash-stat-v" style="color:var(--w)">${vacant}</span>
+        <span class="dash-stat-l">ห้องว่าง</span>
+      </div>
+    </div>`;
+
+  // Finance cards
   document.getElementById('dash-ov').innerHTML=`
-    <div class="ov-card"><div class="ov-v" style="color:var(--s)">${fmtI(collected)}</div><div class="ov-l">รับแล้ว (฿)</div></div>
-    <div class="ov-card"><div class="ov-v" style="color:var(--d)">${fmtI(pending)}</div><div class="ov-l">ค้างชำระ (฿)</div></div>
-    <div class="ov-card"><div class="ov-v" style="color:var(--p)">${thisMonthInvs.length}</div><div class="ov-l">ใบแจ้งหนี้</div></div>`;
+    <div class="dash-finance">
+      <div class="dash-fin-card collected">
+        <span class="dash-fin-ico">✅</span>
+        <span class="dash-fin-amt">฿${fmtI(collected)}</span>
+        <span class="dash-fin-lbl">เก็บแล้วเดือนนี้</span>
+      </div>
+      <div class="dash-fin-card outstanding" onclick="showView('bills')" style="cursor:pointer">
+        <span class="dash-fin-ico">⏳</span>
+        <span class="dash-fin-amt">฿${fmtI(pending)}</span>
+        <span class="dash-fin-lbl">ค้างชำระ ${unpaid} ใบ</span>
+      </div>
+    </div>`;
 
   // Alerts
   const alertsEl=document.getElementById('dash-alerts');
   const alerts=[];
-  unpaidInvs.forEach(inv=>{
-    alerts.push(`<div class="ai"><span class="ai-ico">🔴</span><div class="ai-txt"><div class="ai-tt">ห้อง ${inv.roomNumber} - ${inv.tenantName}</div><div class="ai-st">ค้างชำระ ${THAI_MONTHS[inv.month-1]} ${inv.year} ยอด ฿${fmt(inv.total)}</div></div><span class="badge bd">ค้างชำระ</span></div>`);
+  unpaidInvs.slice(0,5).forEach(inv=>{
+    alerts.push(`<div class="ai"><span class="ai-ico">🔴</span><div class="ai-txt"><div class="ai-tt">ห้อง ${inv.roomNumber} · ${inv.tenantName}</div><div class="ai-st">ค้างชำระ ${THAI_MONTHS[inv.month-1]} ${inv.year} · ฿${fmt(inv.total)}</div></div><span class="badge bd">ค้างชำระ</span></div>`);
   });
-  // Vacant rooms
   S.rooms.filter(r=>r.status==='vacant').forEach(r=>{
-    alerts.push(`<div class="ai"><span class="ai-ico">🟢</span><div class="ai-txt"><div class="ai-tt">ห้อง ${r.number}</div><div class="ai-st">ห้องว่าง - ยังไม่มีผู้เช่า</div></div><span class="badge bs">ว่าง</span></div>`);
+    alerts.push(`<div class="ai"><span class="ai-ico">🟡</span><div class="ai-txt"><div class="ai-tt">ห้อง ${r.number}</div><div class="ai-st">ห้องว่าง · ยังไม่มีผู้เช่า</div></div><span class="badge bs">ว่าง</span></div>`);
   });
-  alertsEl.innerHTML=alerts.length?alerts.join(''):`<div class="empty" style="padding:12px"><span class="ico">✅</span><span class="et" style="font-size:13px">ไม่มีรายการแจ้งเตือน</span></div>`;
+  alertsEl.innerHTML=alerts.length?alerts.join(''):`<div class="empty" style="padding:16px 12px"><span class="ico" style="font-size:40px">✅</span><div class="et" style="font-size:14px;margin-top:8px">ทุกอย่างเรียบร้อย</div><div class="es" style="font-size:12px">ไม่มีรายการค้างชำระ</div></div>`;
 
   // Room dots
-  const dotsEl=document.getElementById('dash-rooms');
-  dotsEl.innerHTML=S.rooms.map(r=>{
+  document.getElementById('dash-rooms').innerHTML=S.rooms.map(r=>{
     const hasUnpaid=S.invoices.some(i=>i.roomId===r.id&&i.status==='unpaid');
     const cls=hasUnpaid?'overdue':r.status;
-    return `<div class="rdot ${cls}" onclick="showView('rooms')" title="${r.tenantName||'ว่าง'}">${r.number}<br><span style="font-size:9px">${r.status==='vacant'?'ว่าง':hasUnpaid?'⚠️':'✓'}</span></div>`;
+    const icon=r.status==='vacant'?'·':hasUnpaid?'!':'✓';
+    return `<div class="rdot ${cls}" onclick="showView('rooms')" title="${r.tenantName||'ว่าง'}">${r.number}<span style="font-size:10px;display:block;margin-top:1px">${icon}</span></div>`;
   }).join('');
 }
 
@@ -1304,11 +1524,12 @@ function showMeterRoom(){
 }
 
 function resetMeterUI(type){
-  document.getElementById(type+'-preview').innerHTML=`<div class="cz-ph"><span class="ico">${type==='water'?'💧':'⚡'}</span><span>แตะปุ่มถ่ายรูปมิเตอร์${type==='water'?'น้ำ':'ไฟ'}</span></div>`;
-  document.getElementById('ocr-'+type+'-btn').disabled=true;
-  document.getElementById(type+'-ocr-result').style.display='none';
-  document.getElementById(type+'-warn').style.display='none';
+  const label=type==='water'?'น้ำ':'ไฟ';
+  const ico=type==='water'?'💧':'⚡';
+  document.getElementById(type+'-preview').innerHTML=`<div class="cz-ph"><span class="ico">${ico}</span><span>แตะถ่ายรูปเก็บหลักฐาน (ไม่บังคับ)</span></div>`;
   document.getElementById(type+'-cam').value='';
+  const calc=document.getElementById(type+'-calc');
+  if(calc) calc.style.display='none';
 }
 
 function photoSelected(input,type){
@@ -1319,64 +1540,35 @@ function photoSelected(input,type){
     const url=e.target.result;
     if(type==='water') S.mc.waterPhoto=url;
     else S.mc.elecPhoto=url;
-    document.getElementById(type+'-preview').innerHTML=`<img src="${url}" alt="meter">`;
-    document.getElementById('ocr-'+type+'-btn').disabled=false;
+    document.getElementById(type+'-preview').innerHTML=`<img src="${url}" alt="meter photo" style="width:100%;height:auto;display:block;max-height:240px;object-fit:cover">`;
+    // Focus the input field after photo
+    const inputEl=document.getElementById(type==='water'?'mc-water-val':'mc-elec-val');
+    setTimeout(()=>inputEl.focus(),300);
   };
   reader.readAsDataURL(file);
 }
 
-let ocrWorker=null;
-async function runOCR(type){
-  const photo=type==='water'?S.mc.waterPhoto:S.mc.elecPhoto;
-  if(!photo){toast('กรุณาถ่ายรูปก่อน','error');return}
-
-  const btn=document.getElementById('ocr-'+type+'-btn');
-  const prev=document.getElementById(type+'-preview');
-  prev.innerHTML+='<div class="cz-overlay"><div class="spin"></div><span>กำลังอ่านค่า...</span></div>';
-  btn.disabled=true;
-
-  try{
-    if(typeof Tesseract==='undefined') throw new Error('Tesseract not loaded');
-    const result=await Tesseract.recognize(photo,'eng',{
-      logger:()=>{},
-      tessedit_char_whitelist:'0123456789.'
-    });
-    const text=result.data.text;
-    const nums=text.match(/\d+/g);
-    if(!nums||!nums.length) throw new Error('ไม่สามารถอ่านค่าได้');
-    const detected=parseInt(nums.sort((a,b)=>b.length-a.length)[0]);
-
-    document.getElementById(type+'-ocr-val').textContent=fmtI(detected);
-    document.getElementById(type+'-ocr-result').style.display='block';
-    document.getElementById(type===('water')?'mc-water-val':'mc-elec-val').value=detected;
-    checkOCRAnomaly(type,detected);
-  }catch(e){
-    toast('ไม่สามารถอ่านค่าอัตโนมัติได้ กรุณากรอกด้วยตนเอง','error');
-    document.getElementById(type+'-ocr-result').style.display='block';
-    document.getElementById(type+'-ocr-val').textContent='?';
-  }
-
-  // Remove overlay
-  const overlay=prev.querySelector('.cz-overlay');
-  if(overlay) overlay.remove();
-  btn.disabled=false;
-}
-
-function checkOCRAnomaly(type,detected){
+function updateUsageCalc(type){
+  const r=S.mc.rooms[S.mc.idx];
+  if(!r) return;
+  const val=parseInt(document.getElementById(type==='water'?'mc-water-val':'mc-elec-val').value);
   const prev=type==='water'?S.mc.prevWater:S.mc.prevElectric;
-  const warnEl=document.getElementById(type+'-warn');
-  if(!prev||prev===0){warnEl.style.display='none';return}
+  const rate=type==='water'?r.waterRate:r.electricRate;
+  const calcEl=document.getElementById(type+'-calc');
+  if(!calcEl) return;
 
-  const diff=detected-prev;
-  const ratio=detected/prev;
-  if(diff<0){
-    warnEl.style.display='block';
-    warnEl.textContent=`⚠️ ค่าที่ตรวจจับ (${fmtI(detected)}) น้อยกว่าค่าก่อนหน้า (${fmtI(prev)}) กรุณาตรวจสอบ`;
-  } else if(diff>500||ratio>5){
-    warnEl.style.display='block';
-    warnEl.textContent=`⚠️ ค่าที่ตรวจจับ (${fmtI(detected)}) สูงผิดปกติ เทียบกับก่อนหน้า (${fmtI(prev)}) ใช้ ${fmtI(diff)} หน่วย กรุณาตรวจสอบ`;
+  if(isNaN(val)||val===''){calcEl.style.display='none';return}
+
+  const usage=val-prev;
+  const cost=Math.max(0,usage)*rate;
+  const unit=type==='water'?'น้ำ':'ไฟ';
+
+  if(usage<0){
+    calcEl.style.display='block';
+    calcEl.innerHTML=`<span style="color:var(--d)">⚠️ ค่า${unit} (${val}) น้อยกว่าก่อนหน้า (${prev}) — กรุณาตรวจสอบ</span>`;
   } else {
-    warnEl.style.display='none';
+    calcEl.style.display='block';
+    calcEl.innerHTML=`ใช้ <span class="usage">${usage}</span> หน่วย × ${rate}฿ = <span class="cost">฿${fmt(cost)}</span>`;
   }
 }
 
@@ -1470,7 +1662,7 @@ function renderBills(){
         <div class="ifoot-btns">
           ${inv.status==='unpaid'?`<button class="btn btns btnsm" onclick="markPaid('${inv.id}',event)">✅ ชำระแล้ว</button>`:`<button class="btn btng btnsm" onclick="markUnpaid('${inv.id}',event)">↩️ ยังไม่ได้รับ</button>`}
           <button class="btn btno btnsm" onclick="viewInvoice('${inv.id}',event)">👁️ ดูใบแจ้งหนี้</button>
-          <button class="btn btno btnsm" onclick="exportInvoicePDF('${inv.id}',event)">📄 PDF</button>
+          <button class="btn btno btnsm" onclick="downloadInvoiceImage('${inv.id}',event)">🖼️ รูป</button>
           <button class="btn btnd btnsm" onclick="deleteInvoice('${inv.id}',event)">🗑️</button>
         </div>
       </div>
@@ -1557,7 +1749,8 @@ function viewInvoice(id,e){
   foot.innerHTML=`
     <button class="btn btng" onclick="closeModal('inv-modal')" style="flex:1">ปิด</button>
     <button class="btn btno" onclick="printInvoice('${id}')" style="flex:1">🖨️ พิมพ์</button>
-    <button class="btn btnp" onclick="exportInvoicePDF('${id}')" style="flex:1">📄 PDF</button>`;
+    <button class="btn btnp" onclick="downloadInvoiceImage('${id}')" style="flex:1">🖼️ รูป</button>
+    <button class="btn btns" onclick="shareInvoice('${id}')" style="flex:1">📤 แชร์</button>`;
   openModal('inv-modal');
   // Render QR after modal opens (per-room override)
   const vRoom=S.rooms.find(r=>r.id===inv.roomId);
@@ -1763,12 +1956,128 @@ function printInvoice(id){
   setTimeout(()=>w.print(),600);
 }
 
-function exportInvoicePDF(id,e){
+async function generateInvoiceCanvas(id){
+  const inv=S.invoices.find(i=>i.id===id);
+  if(!inv||typeof html2canvas==='undefined') return null;
+  const apt=S.settings;
+  const pRoom=S.rooms.find(r=>r.id===inv.roomId);
+  const pPpId=(pRoom?.promptpayId)||apt.promptpayId;
+  const pPpName=(pRoom?.promptpayName)||(pRoom?.promptpayId?'':apt.promptpayName);
+
+  // Generate QR data URL (same as printInvoice)
+  let qrDataUrl='';
+  if(pPpId&&pPpName){
+    try{
+      const tmp=document.createElement('div');
+      tmp.style.cssText='position:absolute;left:-9999px;top:-9999px';
+      document.body.appendChild(tmp);
+      new QRCode(tmp,{text:generatePromptPayPayload(pPpId,inv.total),width:160,height:160,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+      const qc=tmp.querySelector('canvas');
+      if(qc) qrDataUrl=qc.toDataURL('image/png');
+      document.body.removeChild(tmp);
+    }catch(e){console.warn('QR error',e)}
+  }
+
+  const statusBadge=inv.status==='paid'
+    ?`<span style="background:#dcfce7;color:#15803d;padding:3px 12px;border-radius:999px;font-size:11px;font-weight:700">✓ ชำระแล้ว</span>`
+    :`<span style="background:#fee2e2;color:#dc2626;padding:3px 12px;border-radius:999px;font-size:11px;font-weight:700">⏳ ยังไม่ได้ชำระ</span>`;
+  const dueText=(apt.paymentDueDay||apt.lateFeePerDay)?`ชำระไม่เกินวันที่ ${apt.paymentDueDay||5} ของทุกเดือน ปรับ ${apt.lateFeePerDay||50} บาท/วัน`:'';
+  const rightPanel=(pPpId&&pPpName&&qrDataUrl)?`
+    <div style="width:170px;flex-shrink:0;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;text-align:center;background:#f0f7ff">
+      <div style="font-size:11px;font-weight:700;color:#1d4ed8;margin-bottom:6px">สแกน QR ชำระเงิน</div>
+      <img src="${qrDataUrl}" style="width:140px;height:140px;display:block;margin:0 auto">
+      <div style="font-size:12px;color:#444;margin:6px 0;font-weight:700">฿${fmt(inv.total)}</div>
+      <div style="border-top:1px solid #bfdbfe;margin:8px 0;padding-top:8px">
+        <div style="font-size:10px;color:#6b7280;margin-bottom:2px">ชื่อผู้รับเงิน</div>
+        <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:8px">${pPpName}</div>
+        <div style="font-size:10px;color:#6b7280;margin-bottom:2px">เลขพร้อมเพย์</div>
+        <div style="font-size:14px;font-weight:800;color:#1d4ed8;letter-spacing:.5px">${pPpId}</div>
+      </div>
+    </div>`:'';
+
+  // Exact same layout as printInvoice
+  const html=`<div style="font-family:-apple-system,'Segoe UI',sans-serif;background:#fff;padding:20px;color:#111;font-size:13px;width:680px">
+  <div style="display:flex;gap:14px;align-items:flex-start">
+    <div style="flex:1;min-width:0">
+      <div style="border:1.5px solid #222;border-radius:8px;padding:12px;margin-bottom:10px">
+        <div style="text-align:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #e5e7eb">
+          <div style="font-size:17px;font-weight:800">${apt.apartmentName||'ApartmentPro'}</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">${[apt.aptAddress,apt.aptPhone?'โทร '+apt.aptPhone:''].filter(Boolean).join(' | ')}</div>
+        </div>
+        <div style="font-size:16px;font-weight:800;text-align:center;margin-bottom:12px">ใบแจ้งหนี้ค่าเช่า</div>
+        <div style="display:grid;grid-template-columns:auto 1fr auto 1fr;gap:3px 10px;margin-bottom:12px;font-size:12px">
+          <span style="color:#666">ห้องที่:</span><span style="font-weight:600">${inv.roomNumber}</span>
+          <span style="color:#666">ชื่อ:</span><span style="font-weight:600">${inv.tenantName}</span>
+          <span style="color:#666">ประจำเดือน:</span><span style="font-weight:600;grid-column:span 3">${THAI_MONTHS[inv.month-1]} ${inv.year}</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <tr><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb">ค่าเช่า</td><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;white-space:nowrap">฿${fmt(inv.rent)}</td></tr>
+          <tr><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;vertical-align:top">ค่าน้ำ<span style="font-size:10px;color:#6b7280;display:block;margin-top:2px">มิเตอร์: ${fmtI(inv.prevWater)} → ${fmtI(inv.currWater)} = ${fmtI(inv.waterUnits)} หน่วย × ${inv.waterRate}฿</span></td><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;white-space:nowrap;vertical-align:top">฿${fmt(inv.waterCost)}</td></tr>
+          <tr><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;vertical-align:top">ค่าไฟฟ้า<span style="font-size:10px;color:#6b7280;display:block;margin-top:2px">มิเตอร์: ${fmtI(inv.prevElectric)} → ${fmtI(inv.currElectric)} = ${fmtI(inv.electricUnits)} หน่วย × ${inv.electricRate}฿</span></td><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;white-space:nowrap;vertical-align:top">฿${fmt(inv.electricCost)}</td></tr>
+          <tr><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb">ค่าขยะ</td><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600">฿${fmt(inv.garbageFee)}</td></tr>
+          ${(inv.fine||0)>0?`<tr><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;color:#dc2626">ค่าปรับ</td><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#dc2626">฿${fmt(inv.fine)}</td></tr>`:''}
+          ${(inv.otherFee||0)>0?`<tr><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb">ค่าอื่นๆ</td><td style="padding:5px 2px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600">฿${fmt(inv.otherFee)}</td></tr>`:''}
+          ${inv.notes?`<tr><td colspan="2" style="font-size:11px;color:#666;padding:4px 2px">หมายเหตุ: ${inv.notes}</td></tr>`:''}
+          <tr><td style="font-weight:800;font-size:15px;color:#1d4ed8;border-top:2px solid #111;padding:8px 2px 5px">รวมทั้งสิ้น</td><td style="font-weight:800;font-size:15px;color:#1d4ed8;border-top:2px solid #111;text-align:right;padding:8px 2px 5px;white-space:nowrap">฿${fmt(inv.total)}</td></tr>
+        </table>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;flex-wrap:wrap;gap:4px">
+          ${statusBadge}
+          <span style="font-size:11px;color:#666">สร้างเมื่อ: ${inv.generatedAt?.slice(0,10)||''}</span>
+        </div>
+      </div>
+      ${dueText?`<div style="background:#fef3c7;border:1.5px solid #f59e0b;border-radius:8px;padding:8px 12px;text-align:center;font-size:12px;font-weight:700;color:#92400e">⏰ ${dueText}</div>`:''}
+    </div>
+    ${rightPanel}
+  </div>
+</div>`;
+
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;left:-9999px;top:0;z-index:-999;background:#fff';
+  wrap.innerHTML=html;
+  document.body.appendChild(wrap);
+  try{
+    const canvas=await html2canvas(wrap,{scale:2.5,useCORS:true,backgroundColor:'#ffffff',logging:false,allowTaint:true});
+    document.body.removeChild(wrap);
+    return canvas;
+  }catch(e){document.body.removeChild(wrap);console.error('html2canvas',e);return null}
+}
+
+async function downloadInvoiceImage(id,e){
   e?.stopPropagation();
   const inv=S.invoices.find(i=>i.id===id);
   if(!inv){toast('ไม่พบใบแจ้งหนี้','error');return}
-  printInvoice(id);
-  toast('เปิดหน้าต่างพิมพ์ กรุณาเลือก "Save as PDF"');
+  if(typeof html2canvas==='undefined'){toast('กำลังโหลด... ลองใหม่อีกครั้ง','error');return}
+  showLoading('กำลังสร้างรูปภาพ...');
+  const canvas=await generateInvoiceCanvas(id);
+  hideLoading();
+  if(!canvas){toast('ไม่สามารถสร้างรูปได้','error');return}
+  const link=document.createElement('a');
+  link.download=`invoice_${inv.roomNumber}_${THAI_MONTHS[inv.month-1]}${inv.year}.png`;
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+  toast('บันทึกรูปภาพสำเร็จ','success');
+}
+
+async function shareInvoice(id,e){
+  e?.stopPropagation();
+  const inv=S.invoices.find(i=>i.id===id);
+  if(!inv){toast('ไม่พบใบแจ้งหนี้','error');return}
+  if(!navigator.share){toast('เบราว์เซอร์นี้ไม่รองรับการแชร์','error');return}
+  if(typeof html2canvas==='undefined'){toast('กำลังโหลด... ลองใหม่','error');return}
+  showLoading('กำลังเตรียมแชร์...');
+  const canvas=await generateInvoiceCanvas(id);
+  hideLoading();
+  if(!canvas){toast('ไม่สามารถสร้างรูปได้','error');return}
+  canvas.toBlob(async(blob)=>{
+    const file=new File([blob],`invoice_${inv.roomNumber}_${THAI_MONTHS[inv.month-1]}${inv.year}.png`,{type:'image/png'});
+    try{
+      await navigator.share({
+        title:`ใบแจ้งหนี้ ห้อง ${inv.roomNumber}`,
+        text:`ใบแจ้งหนี้ค่าเช่า ${THAI_MONTHS[inv.month-1]} ${inv.year} · ห้อง ${inv.roomNumber} · รวม ฿${fmt(inv.total)}`,
+        files:[file]
+      });
+    }catch(err){if(err.name!=='AbortError') toast('แชร์ไม่สำเร็จ','error')}
+  },'image/png');
 }
 
 // ============================================================
@@ -1857,6 +2166,7 @@ function renderSettings(){
   document.getElementById('st-rates').textContent=`น้ำ ${s.defaultWaterRate}฿ | ไฟ ${s.defaultElectricRate}฿`;
   document.getElementById('st-backup').textContent=s.lastBackup?`ล่าสุด: ${s.lastBackup}`:'ยังไม่ได้สำรอง';
   document.getElementById('st-promptpay').textContent=s.promptpayId?`${s.promptpayName||''} ${maskId(s.promptpayId)}`:'ยังไม่ตั้งค่า';
+  renderAdminZone();
 }
 function maskId(id){
   const c=id.replace(/[-\s]/g,'');
@@ -2223,7 +2533,130 @@ function loadRealData(){
   showView('dashboard');
 }
 
+// ============================================================
+// ADMIN PROTECTION
+// ============================================================
+let adminUnlocked=false;
+const ADMIN_PW_KEY='apt_admin_pw_v1';
+
+function getAdminPwHash(){return localStorage.getItem(ADMIN_PW_KEY)||''}
+function hashPw(pw){return btoa(unescape(encodeURIComponent(pw)))}
+function verifyPw(input){
+  const stored=getAdminPwHash();
+  if(!stored) return true; // no password set = allow
+  return stored===hashPw(input);
+}
+
+function openAdminUnlock(){
+  if(!getAdminPwHash()){
+    // No password set — unlock directly
+    adminUnlocked=true;
+    renderAdminZone();
+    toast('เปิดโหมดผู้ดูแลแล้ว ✅','success');
+    return;
+  }
+  document.getElementById('admin-pw-input').value='';
+  openModal('admin-unlock-modal');
+  setTimeout(()=>document.getElementById('admin-pw-input').focus(),350);
+}
+
+function submitAdminUnlock(){
+  const input=document.getElementById('admin-pw-input').value;
+  if(verifyPw(input)){
+    adminUnlocked=true;
+    closeModal('admin-unlock-modal');
+    renderAdminZone();
+    toast('เปิดโหมดผู้ดูแลแล้ว ✅','success');
+  } else {
+    toast('รหัสผ่านไม่ถูกต้อง','error');
+    document.getElementById('admin-pw-input').value='';
+    document.getElementById('admin-pw-input').focus();
+  }
+}
+
+function toggleAdminZone(){
+  if(adminUnlocked) lockAdmin();
+  else openAdminUnlock();
+}
+
+function lockAdmin(){
+  adminUnlocked=false;
+  renderAdminZone();
+  toast('ล็อกโหมดผู้ดูแลแล้ว 🔒');
+}
+
+function renderAdminZone(){
+  const locked=document.getElementById('admin-zone-locked');
+  const open=document.getElementById('admin-zone-open');
+  const btn=document.getElementById('admin-toggle-btn');
+  if(locked) locked.style.display=adminUnlocked?'none':'block';
+  if(open) open.style.display=adminUnlocked?'block':'none';
+  if(btn) btn.textContent=adminUnlocked?'🔓 ล็อก':'🔒 ปลดล็อก';
+  const pwStatus=document.getElementById('admin-pw-status');
+  if(pwStatus) pwStatus.textContent=getAdminPwHash()?'ตั้งรหัสผ่านแล้ว':'ยังไม่ได้ตั้งรหัสผ่าน';
+}
+
+function openSetAdminPassword(){
+  document.getElementById('new-admin-pw').value='';
+  document.getElementById('confirm-admin-pw').value='';
+  openModal('set-pw-modal');
+  setTimeout(()=>document.getElementById('new-admin-pw').focus(),350);
+}
+
+function saveAdminPassword(){
+  const pw=document.getElementById('new-admin-pw').value;
+  const pw2=document.getElementById('confirm-admin-pw').value;
+  if(!pw){toast('กรุณากรอกรหัสผ่าน','error');return}
+  if(pw.length<4){toast('รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร','error');return}
+  if(pw!==pw2){toast('รหัสผ่านไม่ตรงกัน','error');return}
+  localStorage.setItem(ADMIN_PW_KEY,hashPw(pw));
+  closeModal('set-pw-modal');
+  renderAdminZone();
+  toast('บันทึกรหัสผ่านเรียบร้อย 🔑','success');
+}
+
+function openAdminReset(){
+  if(!adminUnlocked){toast('กรุณาปลดล็อกโหมดผู้ดูแลก่อน','error');return}
+  const inp=document.getElementById('reset-confirm-text');
+  inp.value='';
+  document.getElementById('exec-reset-btn').disabled=true;
+  document.getElementById('exec-reset-btn').style.opacity='.4';
+  openModal('admin-reset-modal');
+  setTimeout(()=>inp.focus(),350);
+}
+
+function executeAdminReset(){
+  const phrase=document.getElementById('reset-confirm-text').value;
+  if(phrase!=='DELETE ALL DATA'){
+    toast('กรุณาพิมพ์ "DELETE ALL DATA" ให้ถูกต้อง','error');
+    return;
+  }
+  closeModal('admin-reset-modal');
+  // Auto-backup first
+  toast('กำลังสำรองข้อมูลก่อนลบ...','success');
+  doBackup();
+  setTimeout(()=>{
+    resetAll();
+  },900);
+}
+
+// Watch the reset confirmation input to enable/disable button
+document.addEventListener('input',e=>{
+  if(e.target.id==='reset-confirm-text'){
+    const btn=document.getElementById('exec-reset-btn');
+    const ok=e.target.value==='DELETE ALL DATA';
+    btn.disabled=!ok;
+    btn.style.opacity=ok?'1':'.4';
+  }
+});
+
+function confirmLoadRealData(){
+  if(!adminUnlocked){toast('กรุณาปลดล็อกโหมดผู้ดูแลก่อน','error');return}
+  if(confirm('โหลดข้อมูลจริงพฤษภาคม 2569?\n\nข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่')) loadRealData();
+}
+
 function resetAll(){
+  // Admin password (ADMIN_PW_KEY) is preserved — only app data is cleared
   ['rooms','readings','invoices','settings'].forEach(k=>DB.del(k));
   location.reload();
 }
@@ -2244,9 +2677,11 @@ document.querySelectorAll('.mover').forEach(m=>{
 // ============================================================
 let toastTimer;
 function toast(msg,type=''){
+  // Only show error toasts — suppress success/info notifications
+  if(type!=='error') return;
   const el=document.getElementById('toast');
   el.textContent=msg;
-  el.className='show'+(type?' '+type:'');
+  el.className='show error';
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>{el.className=''},2800);
 }
