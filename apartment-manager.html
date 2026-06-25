@@ -286,6 +286,7 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .mc-chip{padding:8px 16px;border-radius:999px;border:2px solid var(--bd);background:var(--wh);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;color:var(--tm);flex-shrink:0;transition:all .15s}
 .mc-chip.active{background:var(--p);border-color:var(--p);color:#fff}
 .mc-chip.done{background:var(--sl);border-color:var(--s);color:var(--s)}
+.mc-chip.partial{background:var(--wl);border-color:var(--w);color:var(--w)}
 
 /* QR CODE */
 .qr-section{text-align:center;padding:16px;border-top:1px dashed #e2e8f0;margin-top:16px}
@@ -1474,13 +1475,21 @@ function renderMeterStart(){
   const list=document.getElementById('meter-summary-list');
   const rows=occupied.map(r=>{
     const reading=S.readings.find(rd=>rd.roomId===r.id&&rd.month===m&&rd.year===y);
+    const hasW=reading?.currWater!=null;
+    const hasE=reading?.currElectric!=null;
+    const both=hasW&&hasE;
+    const partial=reading&&(hasW||hasE)&&!both;
+    const ico=both?'✅':partial?'🟡':'⭕';
+    const badgeCls=both?'bs':partial?'bw':'bw';
+    const badgeTxt=both?'ครบแล้ว':partial?'บางส่วน':'รอจด';
+    const detail=both?`น้ำ: ${reading.currWater} | ไฟ: ${reading.currElectric}`:partial?`${hasW?`น้ำ: ${reading.currWater} ✓`:'น้ำ: รอจด'}  ${hasE?`ไฟ: ${reading.currElectric} ✓`:'ไฟ: รอจด'}`:'ยังไม่ได้จดมิเตอร์';
     return `<div class="ai">
-      <span class="ai-ico">${reading?'✅':'⭕'}</span>
+      <span class="ai-ico">${ico}</span>
       <div class="ai-txt">
         <div class="ai-tt">ห้อง ${r.number} - ${r.tenantName}</div>
-        <div class="ai-st">${reading?`น้ำ: ${reading.currWater} | ไฟ: ${reading.currElectric}`:'ยังไม่ได้จดมิเตอร์'}</div>
+        <div class="ai-st">${detail}</div>
       </div>
-      <span class="badge ${reading?'bs':'bw'}">${reading?'แล้ว':'รอจด'}</span>
+      <span class="badge ${badgeCls}">${badgeTxt}</span>
     </div>`;
   });
   list.innerHTML=rows.length?rows.join(''):`<div class="empty" style="padding:12px"><span class="ico" style="font-size:28px">🏘️</span><span class="et" style="font-size:13px">ไม่มีห้องที่มีผู้เช่า</span></div>`;
@@ -1499,8 +1508,11 @@ function buildRoomSelector(){
   const {rooms,idx,month,year}=S.mc;
   const sel=document.getElementById('mc-room-sel');
   sel.innerHTML=rooms.map((r,i)=>{
-    const done=S.readings.some(rd=>rd.roomId===r.id&&rd.month===month&&rd.year===year);
-    return `<button onclick="jumpToRoom(${i})" class="mc-chip ${i===idx?'active':done?'done':''}">${r.number}${done?' ✓':''}</button>`;
+    const rd=S.readings.find(rd=>rd.roomId===r.id&&rd.month===month&&rd.year===year);
+    const done=rd&&rd.currWater!=null&&rd.currElectric!=null;
+    const partial=rd&&(rd.currWater!=null||rd.currElectric!=null)&&!done;
+    const cls=i===idx?'active':done?'done':partial?'partial':'';
+    return `<button onclick="jumpToRoom(${i})" class="mc-chip ${cls}">${r.number}${done?' ✓':partial?' ½':''}</button>`;
   }).join('');
   // Scroll active chip into view
   setTimeout(()=>{const a=sel.querySelector('.mc-chip.active');if(a)a.scrollIntoView({inline:'center',block:'nearest'})},50);
@@ -1537,10 +1549,10 @@ function showMeterRoom(){
   document.getElementById('mc-prev-elec').textContent=`ก่อนหน้า: ${pe}`;
   document.getElementById('mc-prev-info').innerHTML=`<div>น้ำก่อนหน้า: ${pw}</div><div>ไฟก่อนหน้า: ${pe}</div>`;
 
-  // Check if already recorded
+  // Check if already recorded (partial or full)
   const existing=S.readings.find(rd=>rd.roomId===r.id&&rd.month===month&&rd.year===year);
-  document.getElementById('mc-water-val').value=existing?.currWater||'';
-  document.getElementById('mc-elec-val').value=existing?.currElectric||'';
+  document.getElementById('mc-water-val').value=existing?.currWater!=null?existing.currWater:'';
+  document.getElementById('mc-elec-val').value=existing?.currElectric!=null?existing.currElectric:'';
 
   // Reset UI
   resetMeterUI('water');
@@ -1603,22 +1615,34 @@ function updateUsageCalc(type){
 function saveMeterAndNext(){
   const {rooms,idx,month,year}=S.mc;
   const r=rooms[idx];
-  const wv=parseInt(document.getElementById('mc-water-val').value);
-  const ev=parseInt(document.getElementById('mc-elec-val').value);
+  const wRaw=document.getElementById('mc-water-val').value.trim();
+  const eRaw=document.getElementById('mc-elec-val').value.trim();
+  const wv=wRaw===''?null:parseInt(wRaw);
+  const ev=eRaw===''?null:parseInt(eRaw);
 
-  if(isNaN(wv)||isNaN(ev)){toast('กรุณากรอกค่ามิเตอร์ทั้งคู่','error');return}
-  if(wv<S.mc.prevWater&&!confirm(`ค่ามิเตอร์น้ำ (${wv}) น้อยกว่าก่อนหน้า (${S.mc.prevWater}) ยืนยันใช่หรือไม่?`)) return;
-  if(ev<S.mc.prevElectric&&!confirm(`ค่ามิเตอร์ไฟ (${ev}) น้อยกว่าก่อนหน้า (${S.mc.prevElectric}) ยืนยันใช่หรือไม่?`)) return;
+  if(wv===null&&ev===null){toast('กรุณากรอกค่ามิเตอร์อย่างน้อย 1 ค่า','error');return}
+  if(wv!==null&&wv<S.mc.prevWater&&!confirm(`ค่ามิเตอร์น้ำ (${wv}) น้อยกว่าก่อนหน้า (${S.mc.prevWater}) ยืนยันใช่หรือไม่?`)) return;
+  if(ev!==null&&ev<S.mc.prevElectric&&!confirm(`ค่ามิเตอร์ไฟ (${ev}) น้อยกว่าก่อนหน้า (${S.mc.prevElectric}) ยืนยันใช่หรือไม่?`)) return;
 
-  // Save or update reading
+  // Merge with existing partial reading
   const existIdx=S.readings.findIndex(rd=>rd.roomId===r.id&&rd.month===month&&rd.year===year);
-  const rd={id:uid(),roomId:r.id,month,year,prevWater:S.mc.prevWater,currWater:wv,prevElectric:S.mc.prevElectric,currElectric:ev,recordedAt:new Date().toISOString()};
+  const existing=existIdx>=0?S.readings[existIdx]:null;
+  const rd={
+    id:existing?.id||uid(),roomId:r.id,month,year,
+    prevWater:S.mc.prevWater,
+    currWater:wv!==null?wv:(existing?.currWater??null),
+    prevElectric:S.mc.prevElectric,
+    currElectric:ev!==null?ev:(existing?.currElectric??null),
+    recordedAt:new Date().toISOString()
+  };
   if(existIdx>=0) S.readings[existIdx]=rd;
   else S.readings.push(rd);
   save();
   S.mc.idx++;
   showMeterRoom();
-  toast(`บันทึกห้อง ${r.number} เรียบร้อย`,'success');
+  const bothDone=rd.currWater!==null&&rd.currElectric!==null;
+  const label=bothDone?'ครบทั้งสองมิเตอร์':wv!==null?'บันทึกมิเตอร์น้ำแล้ว':'บันทึกมิเตอร์ไฟแล้ว';
+  toast(`ห้อง ${r.number} · ${label}`,'success');
 }
 
 function skipRoom(){
@@ -2124,17 +2148,24 @@ function openGenModal(){
   const occupied=S.rooms.filter(r=>r.status==='occupied');
   const list=document.getElementById('gen-room-list');
   list.innerHTML=occupied.map(r=>{
-    const hasReading=S.readings.some(rd=>rd.roomId===r.id&&rd.month===m&&rd.year===y);
+    const rdg=S.readings.find(rd=>rd.roomId===r.id&&rd.month===m&&rd.year===y);
+    const hasW=rdg?.currWater!=null;
+    const hasE=rdg?.currElectric!=null;
+    const hasReading=hasW&&hasE;
+    const partialReading=rdg&&(hasW||hasE)&&!hasReading;
     const hasInv=S.invoices.some(i=>i.roomId===r.id&&i.month===m&&i.year===y);
+    const statusTxt=hasInv?'✅ มีใบแจ้งหนี้แล้ว':hasReading?'📊 มิเตอร์ครบ พร้อมออกใบแจ้งหนี้':partialReading?`⚠️ มิเตอร์ไม่ครบ (${hasW?'✓น้ำ':'✗น้ำ'} ${hasE?'✓ไฟ':'✗ไฟ'})`:'⚠️ ยังไม่ได้จดมิเตอร์';
+    const badgeCls=hasInv?'bs':hasReading?'bp':partialReading?'bw':'bw';
+    const badgeTxt=hasInv?'แล้ว':hasReading?'พร้อม':partialReading?'ไม่ครบ':'รอมิเตอร์';
     return `<div class="gen-item">
       <div style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" class="gen-chk" value="${r.id}" ${hasInv?'disabled':'checked'} onchange="updateGenCount()">
+        <input type="checkbox" class="gen-chk" value="${r.id}" ${hasInv||!hasReading?'disabled':'checked'} onchange="updateGenCount()">
         <div>
           <div style="font-size:13px;font-weight:600">ห้อง ${r.number} - ${r.tenantName}</div>
-          <div style="font-size:11px;color:var(--tm)">${hasInv?'✅ มีใบแจ้งหนี้แล้ว':hasReading?'📊 มีข้อมูลมิเตอร์':'⚠️ ยังไม่ได้จดมิเตอร์'}</div>
+          <div style="font-size:11px;color:var(--tm)">${statusTxt}</div>
         </div>
       </div>
-      <span class="badge ${hasInv?'bs':hasReading?'bp':'bw'}">${hasInv?'แล้ว':hasReading?'พร้อม':'รอมิเตอร์'}</span>
+      <span class="badge ${badgeCls}">${badgeTxt}</span>
     </div>`;
   }).join('');
   updateGenCount();
@@ -2161,7 +2192,7 @@ function generateSelectedBills(){
   selected.forEach(roomId=>{
     const room=S.rooms.find(r=>r.id===roomId);
     if(!room) return;
-    const reading=S.readings.find(rd=>rd.roomId===roomId&&rd.month===month&&rd.year===year);
+    const reading=S.readings.find(rd=>rd.roomId===roomId&&rd.month===month&&rd.year===year&&rd.currWater!=null&&rd.currElectric!=null);
     if(!reading){skipped++;return}
 
     const waterUnits=Math.max(0,reading.currWater-reading.prevWater);
