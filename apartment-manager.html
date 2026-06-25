@@ -629,11 +629,19 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
     </div>
   </div>
 
-  <div class="sh"><span class="st">ข้อมูลระบบ</span></div>
+  <div class="sh"><span class="st">ข้อมูลแอปพลิเคชัน</span></div>
   <div class="stsec">
-    <div class="strow">
-      <div class="strow-l"><span class="sticon">📦</span><span class="stlbl">เวอร์ชัน</span></div>
-      <span class="stval">ApartmentPro v1.0</span>
+    <div class="strow" onclick="openModal('about-modal')">
+      <div class="strow-l">
+        <span class="sticon" style="background:var(--pl);border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center">
+          <span class="material-symbols-rounded" style="font-size:18px;color:var(--p)">apartment</span>
+        </span>
+        <div>
+          <div class="stlbl">เกี่ยวกับ ApartmentPro</div>
+          <div class="stval">v1.0.0 · Public Beta</div>
+        </div>
+      </div>
+      <span class="chevron">›</span>
     </div>
   </div>
 
@@ -673,6 +681,102 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
   </div>
 
   <div class="section-pad"></div>
+</div>
+
+<!-- About Modal -->
+<div class="mover" id="about-modal">
+  <div class="modal" style="padding-bottom:0;overflow:hidden">
+    <div class="mhandle"></div>
+    <!-- Blue gradient header -->
+    <div style="background:var(--pg);padding:32px 20px 28px;text-align:center;position:relative">
+      <button onclick="closeModal('about-modal')" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1">✕</button>
+      <!-- App icon -->
+      <div style="width:82px;height:82px;background:#fff;border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 10px 36px rgba(0,0,0,.25)">
+        <span class="material-symbols-rounded" style="font-size:46px;color:var(--p)">apartment</span>
+      </div>
+      <div style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px">ApartmentPro</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px">
+        <span style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500">v1.0.0</span>
+        <span style="background:rgba(255,255,255,.18);color:#fff;font-size:11px;font-weight:700;padding:3px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.32);letter-spacing:.2px">Public Beta</span>
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div style="overflow-y:auto;max-height:62vh;padding:14px 14px 32px">
+
+      <!-- Developer card -->
+      <div style="background:var(--wh);border-radius:16px;box-shadow:var(--sh);overflow:hidden;margin-bottom:11px">
+        <div style="padding:11px 16px;background:#f8fafc;border-bottom:1px solid var(--bd)">
+          <span style="font-size:10.5px;font-weight:700;color:var(--tm);letter-spacing:.6px;text-transform:uppercase">นักพัฒนา</span>
+        </div>
+        <div style="padding:16px;display:flex;align-items:center;gap:14px">
+          <div style="width:50px;height:50px;background:var(--pl);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span class="material-symbols-rounded" style="font-size:28px;color:var(--p)">person</span>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--tx)">Phim_saya</div>
+            <div style="font-size:12px;color:var(--tm);margin-top:2px">Developer &amp; Owner</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copyright card -->
+      <div style="background:var(--wh);border-radius:16px;box-shadow:var(--sh);overflow:hidden;margin-bottom:11px">
+        <div style="padding:11px 16px;background:#f8fafc;border-bottom:1px solid var(--bd)">
+          <span style="font-size:10.5px;font-weight:700;color:var(--tm);letter-spacing:.6px;text-transform:uppercase">ลิขสิทธิ์</span>
+        </div>
+        <div style="padding:16px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:36px;height:36px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <span class="material-symbols-rounded" style="font-size:20px;color:#d97706">shield</span>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--tx)">© 2026 Phim_saya. All Rights Reserved.</div>
+          </div>
+          <div style="font-size:12px;color:var(--tm);line-height:1.75;background:#f8fafc;border-radius:10px;padding:12px 14px;border-left:3px solid var(--p)">
+            ซอฟต์แวร์และซอร์สโค้ดนี้ได้รับความคุ้มครองตามกฎหมายลิขสิทธิ์<br><br>
+            ห้ามคัดลอก ทำสำเนา ดัดแปลง แจกจ่าย เผยแพร่ ทำวิศวกรรมย้อนกลับ (Reverse Engineering) ให้เช่า ให้สิทธิ์ใช้งานต่อ หรือนำไปจำหน่าย ไม่ว่าทั้งหมดหรือบางส่วน โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรจากเจ้าของลิขสิทธิ์<br><br>
+            ApartmentPro จัดทำขึ้นเพื่อการใช้งานภายใต้สิทธิ์ที่ได้รับอนุญาตเท่านั้น
+          </div>
+        </div>
+      </div>
+
+      <!-- Website card -->
+      <div style="background:var(--wh);border-radius:16px;box-shadow:var(--sh);overflow:hidden;margin-bottom:11px">
+        <div style="padding:11px 16px;background:#f8fafc;border-bottom:1px solid var(--bd)">
+          <span style="font-size:10.5px;font-weight:700;color:var(--tm);letter-spacing:.6px;text-transform:uppercase">เว็บไซต์</span>
+        </div>
+        <a href="https://bumizzii-rgb.github.io/Apartment-manager/" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bd);text-decoration:none;-webkit-tap-highlight-color:transparent">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:38px;height:38px;background:var(--pl);border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <span class="material-symbols-rounded" style="font-size:21px;color:var(--p)">rocket_launch</span>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--tx)">Beta Website</div>
+              <div style="font-size:11px;color:var(--p);margin-top:1px">bumizzii-rgb.github.io/Apartment-manager</div>
+            </div>
+          </div>
+          <span class="material-symbols-rounded" style="font-size:18px;color:var(--tm);flex-shrink:0">open_in_new</span>
+        </a>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:38px;height:38px;background:#f1f5f9;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <span class="material-symbols-rounded" style="font-size:21px;color:#94a3b8">language</span>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--tx)">Official Website</div>
+              <div style="font-size:11px;color:var(--tm);margin-top:1px">Coming Soon</div>
+            </div>
+          </div>
+          <span style="font-size:11px;font-weight:700;color:var(--tm);background:#f1f5f9;padding:4px 10px;border-radius:999px">เร็วๆ นี้</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align:center;padding:10px 0 4px">
+        <div style="font-size:13px;color:var(--tm)">Made with ❤️ by <span style="font-weight:700;color:var(--tx)">Phim_saya</span></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Admin Unlock Modal -->
