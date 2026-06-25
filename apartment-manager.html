@@ -7,6 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1d4ed8">
 <title>ApartmentPro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
@@ -15,6 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+.material-symbols-rounded{font-family:'Material Symbols Rounded';font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;font-style:normal;display:inline-block;line-height:1;text-transform:none;letter-spacing:normal;word-wrap:normal;white-space:nowrap;direction:ltr;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :root{
   --p:#1a56db;--pl:#dbeafe;--pd:#1e3a8a;
   --pg:linear-gradient(145deg,#1e3a8a 0%,#1a56db 60%,#3b82f6 100%);
@@ -28,7 +33,7 @@
   --sh2:0 8px 32px rgba(0,0,0,.10);
   --nh:72px;
 }
-body{font-family:-apple-system,'SF Pro Text','Segoe UI','Noto Sans Thai',sans-serif;background:#f0f4f8;color:var(--tx);min-height:100vh;padding-bottom:var(--nh);font-size:15px;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:'Noto Sans Thai',-apple-system,'Segoe UI',sans-serif;background:#f0f4f8;color:var(--tx);min-height:100vh;padding-bottom:var(--nh);font-size:15px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 /* NAV */
 #bnav{position:fixed;bottom:0;left:0;right:0;height:var(--nh);background:var(--wh);border-top:none;display:flex;z-index:1000;box-shadow:0 -1px 0 rgba(0,0,0,.06),0 -6px 28px rgba(0,0,0,.08)}
@@ -40,11 +45,18 @@ body{font-family:-apple-system,'SF Pro Text','Segoe UI','Noto Sans Thai',sans-se
 .ni span{transition:color .2s ease}
 
 /* HEADER */
-.ph{background:var(--pg);color:#fff;padding:22px 20px 24px;display:flex;align-items:flex-start;justify-content:space-between}
-.ph h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
-.ph-sub{font-size:12px;opacity:.75;margin-top:4px;font-weight:400}
-.ph-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.ph-btn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(10px)}
+.ph{background:var(--pg);color:#fff;padding:14px 16px 16px;display:flex;align-items:center;justify-content:space-between}
+.ph h1{font-size:18px;font-weight:700;letter-spacing:-.1px;line-height:1.3}
+.ph-sub{font-size:11px;opacity:.7;margin-top:2px;font-weight:400;letter-spacing:.1px}
+.ph-actions{display:flex;align-items:center;gap:8px}
+.ph-bell{position:relative;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;padding:0;flex-shrink:0}
+.ph-bell svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ph-badge{position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;border-radius:999px;font-size:9px;font-weight:700;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #1e3a8a;line-height:1}
+/* SECTION headings */
+.st{font-size:16px;font-weight:700;color:var(--tx);letter-spacing:-.1px}
+.sa{font-size:13px;color:var(--p);font-weight:600;cursor:pointer}
+/* CARD titles */
+.card-title{font-size:11px;font-weight:600;color:var(--tm);margin-bottom:14px;text-transform:uppercase;letter-spacing:.8px}
 
 /* VIEWS */
 .view{display:none}.view.active{display:block}
@@ -114,6 +126,11 @@ body{font-family:-apple-system,'SF Pro Text','Segoe UI','Noto Sans Thai',sans-se
 .btnw{background:var(--w);color:#fff}
 .btnf{width:100%;justify-content:center}
 .btnsm{padding:10px 16px;font-size:13px}
+/* INVOICE ACTION BUTTONS */
+.btn-inv{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex:1;padding:14px 6px;border-radius:16px;border:1.5px solid #2563eb;background:#fff;color:#2563eb;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,transform .15s;font-family:'Noto Sans Thai',sans-serif;-webkit-tap-highlight-color:transparent;line-height:1.3;min-height:80px}
+.btn-inv .material-symbols-rounded{font-family:'Material Symbols Rounded';font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;font-size:26px;line-height:1;display:block;white-space:nowrap;overflow:hidden}
+.btn-inv:active{transform:scale(.94);background:#eff6ff}
+@media(hover:hover){.btn-inv:hover{background:#eff6ff;border-color:#1d4ed8}}
 
 /* FAB */
 .fab{position:fixed;bottom:calc(var(--nh)+18px);right:18px;width:60px;height:60px;border-radius:50%;background:var(--p);color:#fff;font-size:28px;border:none;box-shadow:0 6px 24px rgba(26,86,219,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:500;transition:transform .2s}
@@ -211,11 +228,15 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .inv-paid{display:inline-block;background:var(--sl);color:var(--s);padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700;margin-top:10px}
 .inv-unpaid{display:inline-block;background:var(--dl);color:var(--d);padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700;margin-top:10px}
 
-/* TOAST */
-#toast{position:fixed;bottom:calc(var(--nh)+18px);left:16px;right:16px;background:#1e293b;color:#fff;padding:16px 20px;border-radius:16px;font-size:15px;font-weight:600;z-index:9999;transform:translateY(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.2)}
-#toast.show{transform:translateY(0)}
-#toast.success{background:var(--s)}
-#toast.error{background:var(--d)}
+/* FLOATING TOAST */
+@keyframes ft-in{from{opacity:0;transform:translateY(-10px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ft-out{from{opacity:1}to{opacity:0}}
+#ft{position:fixed;top:16px;right:16px;z-index:9999;display:none;align-items:center;gap:10px;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;color:#fff;box-shadow:0 6px 28px rgba(0,0,0,.18);max-width:260px;pointer-events:none}
+#ft.ft-show{display:flex;animation:ft-in .25s ease forwards}
+#ft.ft-hide{display:flex;animation:ft-out .25s ease forwards}
+#ft.ft-success{background:#059669}
+#ft.ft-error{background:#dc2626}
+@media(max-width:480px){#ft{right:auto;left:50%;transform:translateX(-50%)}}
 
 /* SPINNER */
 .spin{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--p);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto}
@@ -377,8 +398,8 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
   </button>
 </nav>
 
-<!-- TOAST -->
-<div id="toast"></div>
+<!-- FLOATING TOAST -->
+<div id="ft"></div>
 
 <!-- LOADING -->
 <div id="loading"><div class="spin"></div><span id="loading-text">กำลังโหลด...</span></div>
@@ -391,10 +412,13 @@ select.fc{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
       <div class="ph-sub" id="today-date"></div>
     </div>
     <div class="ph-actions">
-      <button class="ph-btn" onclick="showView('meter')">📷 จดมิเตอร์</button>
-      <span id="sync-status" style="font-size:11px;opacity:.85;cursor:pointer;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.2)" onclick="loadFromCloud()">🔄 กำลังเชื่อมต่อ...</span>
+      <button class="ph-bell" onclick="document.getElementById('dash-alerts').scrollIntoView({behavior:'smooth'})" aria-label="แจ้งเตือน">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="ph-badge" id="notif-badge" style="display:none">0</span>
+      </button>
     </div>
   </div>
+  <span id="sync-status" style="display:none"></span>
 
   <div id="dash-stats"></div>
 
@@ -1255,6 +1279,10 @@ function renderDashboard(){
   const occupancyPct=total>0?Math.round(occupied/total*100):0;
 
   document.getElementById('apt-name-hdr').textContent=S.settings.apartmentName||'ApartmentPro';
+  // Bell badge
+  const totalNotifs=unpaid+S.rooms.filter(r=>r.status==='vacant').length;
+  const badge=document.getElementById('notif-badge');
+  if(badge){badge.textContent=totalNotifs>99?'99+':totalNotifs;badge.style.display=totalNotifs>0?'flex':'none';}
 
   // Hero card + room stats
   document.getElementById('dash-stats').innerHTML=`
@@ -1747,10 +1775,16 @@ function viewInvoice(id,e){
   document.getElementById('inv-modal-title').textContent=`ห้อง ${inv.roomNumber} - ${THAI_MONTHS[inv.month-1]} ${inv.year}`;
   const foot=document.getElementById('inv-modal-foot');
   foot.innerHTML=`
-    <button class="btn btng" onclick="closeModal('inv-modal')" style="flex:1">ปิด</button>
-    <button class="btn btno" onclick="printInvoice('${id}')" style="flex:1">🖨️ พิมพ์</button>
-    <button class="btn btnp" onclick="downloadInvoiceImage('${id}')" style="flex:1">🖼️ รูป</button>
-    <button class="btn btns" onclick="shareInvoice('${id}')" style="flex:1">📤 แชร์</button>`;
+    <button class="btn btng btnsm" onclick="closeModal('inv-modal')" style="flex:0 0 auto;padding:10px 18px">ปิด</button>
+    <button class="btn-inv" onclick="printInvoice('${id}')">
+      <span class="material-symbols-rounded">print</span><span>พิมพ์</span>
+    </button>
+    <button class="btn-inv" onclick="downloadInvoiceImage('${id}')">
+      <span class="material-symbols-rounded">image_download</span><span>บันทึกรูป</span>
+    </button>
+    <button class="btn-inv" onclick="shareInvoice('${id}')">
+      <span class="material-symbols-rounded">share</span><span>แชร์</span>
+    </button>`;
   openModal('inv-modal');
   // Render QR after modal opens (per-room override)
   const vRoom=S.rooms.find(r=>r.id===inv.roomId);
@@ -2675,15 +2709,22 @@ document.querySelectorAll('.mover').forEach(m=>{
 // ============================================================
 // TOAST
 // ============================================================
-let toastTimer;
+let _ftTimer;
+const _CHECK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>';
+const _CROSS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 function toast(msg,type=''){
-  // Only show error toasts — suppress success/info notifications
-  if(type!=='error') return;
-  const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.className='show error';
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{el.className=''},2800);
+  const el=document.getElementById('ft');
+  if(!el) return;
+  clearTimeout(_ftTimer);
+  el.className='';
+  void el.offsetWidth; // force reflow to restart animation
+  const isErr=type==='error';
+  el.className=(isErr?'ft-error':'ft-success')+' ft-show';
+  el.innerHTML=(isErr?_CROSS:_CHECK)+'<span>'+msg+'</span>';
+  _ftTimer=setTimeout(()=>{
+    el.classList.replace('ft-show','ft-hide');
+    setTimeout(()=>{el.className=''},260);
+  },2000);
 }
 
 // ============================================================
